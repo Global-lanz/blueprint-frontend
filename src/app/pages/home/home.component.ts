@@ -14,9 +14,9 @@ import { AuthService, User } from '../../services/auth.service';
       <div class="bp-container">
         <!-- Hero Section -->
         <div class="bp-text-center bp-mb-2xl">
-          <h1>Welcome back, ` + "{{ user()?.name || 'User' }}" + ` 👋</h1>
+          <h1>Bem-vindo, ` + "{{ user()?.name || 'Usuário' }}" + ` 👋</h1>
           <p class="bp-text-muted" style="font-size: 1.125rem;">
-            Build your digital products with confidence using our structured templates
+            Construa seus produtos digitais com confiança usando nossos templates estruturados
           </p>
         </div>
 
@@ -24,41 +24,41 @@ import { AuthService, User } from '../../services/auth.service';
         <div class="bp-grid bp-grid-3 bp-mb-2xl">
           <div class="bp-card bp-text-center">
             <h3 class="bp-text-primary" style="font-size: 2.5rem; margin: 0;">` + '{{ projects().length }}' + `</h3>
-            <p class="bp-text-muted">Active Projects</p>
+            <p class="bp-text-muted">Projetos Ativos</p>
           </div>
           <div class="bp-card bp-text-center">
             <h3 class="bp-text-primary" style="font-size: 2.5rem; margin: 0;">` + '{{ templates().length }}' + `</h3>
-            <p class="bp-text-muted">Available Templates</p>
+            <p class="bp-text-muted">Templates Disponíveis</p>
           </div>
           <div class="bp-card bp-text-center">
             <h3 class="bp-text-success" style="font-size: 2.5rem; margin: 0;">` + '{{ completedCount() }}' + `</h3>
-            <p class="bp-text-muted">Completed Tasks</p>
+            <p class="bp-text-muted">Tarefas Concluídas</p>
           </div>
         </div>
 
         <!-- Quick Actions -->
         <div class="bp-card bp-mb-2xl">
           <div class="bp-card-header">
-            <h3 class="bp-card-title">Quick Actions</h3>
+            <h3 class="bp-card-title">Ações Rápidas</h3>
           </div>
           <div class="bp-flex bp-gap-md bp-flex-wrap">
             <button 
-              routerLink="/projects/new" 
+              routerLink="/templates" 
               class="bp-btn bp-btn-primary"
             >
-              ✨ Start New Project
+              ✨ Criar Novo Projeto
             </button>
             <button 
               routerLink="/templates" 
               class="bp-btn bp-btn-secondary"
             >
-              📚 Browse Templates
+              📚 Explorar Templates
             </button>
             <button 
               routerLink="/projects" 
               class="bp-btn bp-btn-secondary"
             >
-              📊 View All Projects
+              📊 Ver Todos os Projetos
             </button>
           </div>
         </div>
@@ -67,8 +67,8 @@ import { AuthService, User } from '../../services/auth.service';
         <div class="bp-card bp-mb-2xl">
           <div class="bp-card-header">
             <div class="bp-flex bp-justify-between bp-items-center">
-              <h3 class="bp-card-title">Recent Projects</h3>
-              <a routerLink="/projects" class="bp-btn bp-btn-sm bp-btn-secondary">View All</a>
+              <h3 class="bp-card-title">Projetos Recentes</h3>
+              <a routerLink="/projects" class="bp-btn bp-btn-sm bp-btn-secondary">Ver Todos</a>
             </div>
           </div>
 
@@ -78,10 +78,10 @@ import { AuthService, User } from '../../services/auth.service';
           
           <div class="bp-text-center bp-text-muted" style="padding: 3rem;" *ngIf="!loadingProjects() && projects().length === 0">
             <p style="font-size: 3rem; margin-bottom: 1rem;">📋</p>
-            <h4>No projects yet</h4>
-            <p>Start your first project from a template to begin your journey!</p>
+            <h4>Nenhum projeto ainda</h4>
+            <p>Comece seu primeiro projeto a partir de um template!</p>
             <button routerLink="/templates" class="bp-btn bp-btn-primary bp-mt-lg">
-              Browse Templates
+              Explorar Templates
             </button>
           </div>
           
@@ -92,17 +92,17 @@ import { AuthService, User } from '../../services/auth.service';
                 <span class="bp-badge bp-badge-success">` + '{{ project.status }}' + `</span>
               </div>
               <p class="bp-text-muted bp-mb-md">
-                Created ` + '{{ formatDate(project.createdAt) }}' + `
+                Criado em ` + '{{ formatDate(project.createdAt) }}' + `
               </p>
               <div class="bp-flex bp-gap-md">
                 <button 
                   [routerLink]="['/projects', project.id]" 
                   class="bp-btn bp-btn-sm bp-btn-primary"
                 >
-                  Open
+                  Abrir
                 </button>
                 <button class="bp-btn bp-btn-sm bp-btn-secondary">
-                  View Progress
+                  Ver Progresso
                 </button>
               </div>
             </div>
@@ -113,8 +113,8 @@ import { AuthService, User } from '../../services/auth.service';
         <div class="bp-card">
           <div class="bp-card-header">
             <div class="bp-flex bp-justify-between bp-items-center">
-              <h3 class="bp-card-title">Available Templates</h3>
-              <a routerLink="/templates" class="bp-btn bp-btn-sm bp-btn-secondary">View All</a>
+              <h3 class="bp-card-title">Templates Disponíveis</h3>
+              <a routerLink="/templates" class="bp-btn bp-btn-sm bp-btn-secondary">Ver Todos</a>
             </div>
           </div>
 
@@ -124,8 +124,8 @@ import { AuthService, User } from '../../services/auth.service';
           
           <div class="bp-text-center bp-text-muted" style="padding: 3rem;" *ngIf="!loadingTemplates() && templates().length === 0">
             <p style="font-size: 3rem; margin-bottom: 1rem;">📚</p>
-            <h4>No templates available</h4>
-            <p>Contact an administrator to create templates.</p>
+            <h4>Nenhum template disponível</h4>
+            <p>Entre em contato com o administrador para criar templates.</p>
           </div>
           
           <div class="bp-grid bp-grid-3" *ngIf="!loadingTemplates() && templates().length > 0">
@@ -142,7 +142,7 @@ import { AuthService, User } from '../../services/auth.service';
                 class="bp-btn bp-btn-sm bp-btn-primary"
                 style="width: 100%;"
               >
-                Use Template
+                Usar Template
               </button>
             </div>
           </div>

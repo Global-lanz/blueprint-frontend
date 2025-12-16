@@ -2,6 +2,7 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { TemplatesService, Template } from '../../services/templates.service';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-templates',
@@ -11,8 +12,8 @@ import { TemplatesService, Template } from '../../services/templates.service';
     <div class="bp-page">
       <div class="bp-container">
         <div class="bp-mb-2xl">
-          <h1>Template Library</h1>
-          <p class="bp-text-muted">Choose a template to start your digital product journey</p>
+          <h1>Biblioteca de Templates</h1>
+          <p class="bp-text-muted">Escolha um template de projeto para iniciar seu trabalho</p>
         </div>
 
         <div class="bp-loading" *ngIf="loading()">
@@ -22,8 +23,8 @@ import { TemplatesService, Template } from '../../services/templates.service';
         <div class="bp-card bp-text-center" *ngIf="!loading() && templates().length === 0">
           <div style="padding: 4rem 2rem;">
             <p style="font-size: 4rem; margin-bottom: 1rem;">📚</p>
-            <h3>No templates available yet</h3>
-            <p class="bp-text-muted">Check back later or contact support</p>
+            <h3>Nenhum template disponível</h3>
+            <p class="bp-text-muted">Verifique novamente mais tarde ou entre em contato com o suporte</p>
           </div>
         </div>
         
@@ -38,11 +39,11 @@ import { TemplatesService, Template } from '../../services/templates.service';
             <div class="bp-card-body">
               <p class="bp-text-muted">` + '{{ template.description }}' + `</p>
               <div class="bp-flex bp-gap-sm bp-mb-md">
-                <span class="bp-badge bp-badge-success" *ngIf="template.isActive">Active</span>
-                <span class="bp-badge bp-badge-warning" *ngIf="!template.isActive">Inactive</span>
+                <span class="bp-badge bp-badge-success" *ngIf="template.isActive">Ativo</span>
+                <span class="bp-badge bp-badge-warning" *ngIf="!template.isActive">Inativo</span>
               </div>
               <p class="bp-text-muted" style="font-size: 0.875rem;">
-                Updated: ` + '{{ formatDate(template.updatedAt) }}' + `
+                Atualizado: ` + '{{ formatDate(template.updatedAt) }}' + `
               </p>
             </div>
             <div class="bp-card-footer">
@@ -50,13 +51,14 @@ import { TemplatesService, Template } from '../../services/templates.service';
                 [routerLink]="['/templates', template.id]"
                 class="bp-btn bp-btn-sm bp-btn-secondary"
               >
-                View Details
+                Ver Detalhes
               </button>
               <button 
-                [routerLink]="['/projects/new', template.id]"
+                [routerLink]="['/projects/create', template.id]"
                 class="bp-btn bp-btn-sm bp-btn-primary"
+                *ngIf="template.isActive"
               >
-                Use Template
+                ✨ Usar Template
               </button>
             </div>
           </div>
@@ -67,6 +69,7 @@ import { TemplatesService, Template } from '../../services/templates.service';
 })
 export class TemplatesComponent implements OnInit {
   private templatesService = inject(TemplatesService);
+  private authService = inject(AuthService);
 
   templates = signal<Template[]>([]);
   loading = signal(true);
@@ -75,10 +78,16 @@ export class TemplatesComponent implements OnInit {
     this.loadTemplates();
   }
 
+  isAdmin(): boolean {
+    return this.authService.currentUser()?.role === 'ADMIN';
+  }
+
   loadTemplates() {
     this.templatesService.getAll().subscribe({
       next: (data) => {
-        this.templates.set(data);
+        // Filtrar apenas templates ativos para clientes
+        const filtered = this.isAdmin() ? data : data.filter(t => t.isActive);
+        this.templates.set(filtered);
         this.loading.set(false);
       },
       error: (err) => {

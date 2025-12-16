@@ -1,35 +1,116 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
+import { ToastService } from '../../services/toast.service';
+
+interface Subtask {
+  description: string;
+}
+
+interface Task {
+  title: string;
+  description: string;
+  subtasks: Subtask[];
+}
+
+interface TemplateForm {
+  name: string;
+  version: string;
+  description: string;
+  tasks: Task[];
+}
 
 @Component({
   selector: 'app-admin-templates',
-  template: `
-  <h2>Admin - Templates</h2>
-  <button class="btn btn-primary mb-3" (click)="createSample()">Create sample template</button>
-  <ul class="list-group">
-    <li *ngFor="let t of templates" class="list-group-item">
-      {{t.name}} (v{{t.version}}) - <button class="btn btn-sm btn-outline-secondary" (click)="view(t.id)">View</button>
-    </li>
-  </ul>
-  `,
+  templateUrl: './templates.component.html',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
 })
 export class AdminTemplatesComponent implements OnInit {
   http = inject(HttpClient);
-  templates: any[] = [];
+  router = inject(Router);
+  toast = inject(ToastService);
+  
+  templates = signal<any[]>([]);
+  showCreateForm = false;
+  saving = signal(false);
+  
+  templateForm: TemplateForm = {
+    name: '',
+    version: '1.0',
+    description: '',
+    tasks: []
+  };
+
   async ngOnInit() {
+    await this.loadTemplates();
+  }
+
+  async loadTemplates() {
     try {
-      this.templates = await this.http.get('/api/templates').toPromise() as any[];
-    } catch (err) {}
+      this.templates.set(await this.http.get<any[]>('/api/templates').toPromise() as any[]);
+    } catch (err) {
+      console.error('Erro ao carregar templates:', err);
+    }
   }
-  async createSample() {
-    const body = { name: 'Sample Admin Template', version: '1.0', tasks: [{ title: 'T1', description: 'Desc', subtasks: [{ description: 'S1' }] }] };
-    await this.http.post('/api/templates', body).toPromise();
-    this.ngOnInit();
+
+  addTask() {
+    this.templateForm.tasks.push({
+      title: '',
+      description: '',
+      subtasks: []
+    });
   }
-  view(id: string) {
-    alert('Will open template ' + id);
+
+  removeTask(index: number) {
+    this.templateForm.tasks.splice(index, 1);
+  }
+
+  addSubtask(taskIndex: number) {
+    this.templateForm.tasks[taskIndex].subtasks.push({ description: '' });
+  }
+
+  removeSubtask(taskIndex: number, subtaskIndex: number) {
+    this.templateForm.tasks[taskIndex].subtasks.splice(subtaskIndex, 1);
+  }
+
+  async createTemplate() {
+    if (!this.templateForm.name || !this.templateForm.version) {
+      this.toast.warning('Preencha os campos obrigatórios');
+      return;
+    }
+
+    this.saving.set(true);
+    try {
+      await this.http.post('/api/templates', this.templateForm).toPromise();
+      this.toast.success('Template criado com sucesso!');
+      this.resetForm();
+      this.showCreateForm = false;
+      await this.loadTemplates();
+    } catch (err: any) {
+      this.toast.error('Erro ao criar template: ' + (err.error?.message || 'Erro desconhecido'));
+      console.error(err);
+    } finally {
+      this.saving.set(false);
+    }
+  }
+
+  resetForm() {
+    this.templateForm = {
+      name: '',
+      version: '1.0',
+      description: '',
+      tasks: []
+    };
+  }
+
+  viewTemplate(id: string) {
+    this.router.navigate(['/templates', id]);
+  }
+
+  editTemplate(id: string) {
+    this.router.navigate(['/admin/templates', id, 'edit']);
   }
 }

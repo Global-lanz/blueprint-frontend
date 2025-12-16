@@ -1,0 +1,81 @@
+<div class="bp-page">
+  <div class="bp-container">
+    <div class="bp-flex bp-justify-between bp-items-center bp-mb-2xl">
+      <div>
+        <h1>Meus Projetos</h1>
+        <p class="bp-text-muted">Gerencie e acompanhe seus projetos de produtos digitais</p>
+      </div>
+    </div>
+
+    <div class="bp-loading" *ngIf="loading()">
+      <div class="bp-spinner"></div>
+    </div>
+    
+    <div class="bp-card bp-text-center" *ngIf="!loading() && projects().length === 0">
+      <div style="padding: 4rem 2rem;">
+        <p style="font-size: 4rem; margin-bottom: 1rem;">📋</p>
+        <h3>Nenhum projeto ainda</h3>
+        <p class="bp-text-muted bp-mb-lg">Crie seu primeiro projeto a partir de um template</p>
+        <button 
+          routerLink="/templates"
+          class="bp-btn bp-btn-primary"
+        >
+          Explorar Templates
+        </button>
+      </div>
+    </div>
+    
+    <div class="bp-card" *ngIf="!loading() && projects().length > 0">
+      <table class="bp-table">
+        <thead>
+          <tr>
+            <th>Nome do Projeto</th>
+            <th>Template</th>
+            <th>Criado em</th>
+            <th>Progresso</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let project of projects()">
+            <td>
+              <strong>{{ project.name }}</strong>
+            </td>
+            <td class="bp-text-muted">
+              {{ project.template?.name || 'N/A' }}
+              <span class="bp-badge bp-badge-primary bp-ml-sm" *ngIf="project.templateVersion">v{{ project.templateVersion }}</span>
+            </td>
+            <td class="bp-text-muted">
+              {{ formatDate(project.createdAt) }}
+            </td>
+            <td>
+              <div class="bp-progress">
+                <div 
+                  class="bp-progress-bar" 
+                  [style.width]="project.progress + '%'"
+                ></div>
+              </div>
+              <span class="bp-text-muted bp-text-sm">{{ project.progress.toFixed(0) }}%</span>
+            </td>
+            <td>
+              <div class="bp-flex bp-gap-sm">
+                <button 
+                  [routerLink]="['/projects', project.id]"
+                  class="bp-btn bp-btn-sm bp-btn-primary"
+                >
+                  Abrir
+                </button>
+                <button 
+                  (click)="deleteProject(project.id)"
+                  class="bp-btn bp-btn-sm bp-btn-danger"
+                >
+                  Excluir
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

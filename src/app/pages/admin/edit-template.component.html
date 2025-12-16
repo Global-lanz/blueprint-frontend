@@ -1,0 +1,297 @@
+<div class="bp-page">
+  <div class="bp-container">
+    <div class="bp-loading" *ngIf="loading()">
+      <div class="bp-spinner"></div>
+    </div>
+
+    <div *ngIf="!loading()">
+      <div class="bp-flex bp-justify-between bp-items-center bp-mb-2xl">
+        <div>
+          <h1>Editar Template de Projeto</h1>
+          <p class="bp-text-muted">Modifique as informações e tarefas do template</p>
+        </div>
+        <button class="bp-btn bp-btn-secondary" (click)="cancel()">
+          ← Voltar
+        </button>
+      </div>
+
+      <div class="bp-card">
+        <div class="bp-card-body">
+          <form (ngSubmit)="saveTemplate()">
+            <!-- Informações Básicas -->
+            <div class="bp-form-group">
+              <label class="bp-label">Nome do Template *</label>
+              <input 
+                type="text" 
+                class="bp-input" 
+                [(ngModel)]="templateForm.name"
+                name="name"
+                required
+              />
+            </div>
+
+            <div class="bp-grid bp-grid-2 bp-gap-md">
+              <div class="bp-form-group">
+                <label class="bp-label">Versão *</label>
+                <input 
+                  type="text" 
+                  class="bp-input" 
+                  [(ngModel)]="templateForm.version"
+                  name="version"
+                  required
+                />
+              </div>
+            </div>
+
+            <div class="bp-form-group">
+              <label class="bp-label">Descrição</label>
+              <textarea 
+                class="bp-input" 
+                [(ngModel)]="templateForm.description"
+                name="description"
+                rows="3"
+              ></textarea>
+            </div>
+
+            <!-- Etapas -->
+            <div class="bp-mb-lg">
+              <div class="bp-flex bp-justify-between bp-items-center bp-mb-md">
+                <h4>Etapas do Projeto</h4>
+                <button 
+                  type="button"
+                  class="bp-btn bp-btn-sm bp-btn-primary" 
+                  (click)="addStage()"
+                >
+                  + Adicionar Etapa
+                </button>
+              </div>
+
+              <div *ngFor="let stage of templateForm.stages; let si = index" class="bp-card bp-mb-lg" style="border-left: 4px solid #4f46e5;">
+                <div class="bp-card-header" style="background: #f5f5ff;">
+                  <div class="bp-flex bp-justify-between bp-items-center">
+                    <h4 class="bp-card-title" style="color: #4f46e5;">📋 Etapa #{{ si + 1 }}</h4>
+                    <button 
+                      type="button"
+                      class="bp-btn bp-btn-sm bp-btn-error" 
+                      (click)="removeStage(si)"
+                    >
+                      ✕ Remover Etapa
+                    </button>
+                  </div>
+                </div>
+                <div class="bp-card-body">
+                  <div class="bp-form-group">
+                    <label class="bp-label">Nome da Etapa *</label>
+                    <input 
+                      type="text" 
+                      class="bp-input" 
+                      [(ngModel)]="stage.name"
+                      [name]="'stage-name-' + si"
+                      placeholder="Ex: Planejamento, Execução, Finalização..."
+                      required
+                    />
+                  </div>
+
+                  <div class="bp-form-group">
+                    <label class="bp-label">Descrição da Etapa</label>
+                    <textarea 
+                      class="bp-input" 
+                      [(ngModel)]="stage.description"
+                      [name]="'stage-description-' + si"
+                      placeholder="Descreva o que será feito nesta etapa..."
+                      rows="2"
+                    ></textarea>
+                  </div>
+
+                  <!-- Tarefas da Etapa -->
+                  <div class="bp-mb-md">
+                    <div class="bp-flex bp-justify-between bp-items-center bp-mb-sm">
+                      <label class="bp-label">Tarefas desta Etapa</label>
+                      <button 
+                        type="button"
+                        class="bp-btn bp-btn-sm bp-btn-secondary" 
+                        (click)="addTaskToStage(si)"
+                      >
+                        + Tarefa
+                      </button>
+                    </div>
+
+                    <div *ngFor="let task of stage.tasks; let ti = index" class="bp-card bp-mb-md" style="background: #fafafa;">
+                      <div class="bp-card-header" style="background: #f0f0f0;">
+                        <div class="bp-flex bp-justify-between bp-items-center">
+                          <h5 class="bp-card-title">Tarefa #{{ ti + 1 }}</h5>
+                          <button 
+                            type="button"
+                            class="bp-btn bp-btn-sm bp-btn-error" 
+                            (click)="removeTaskFromStage(si, ti)"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      </div>
+                      <div class="bp-card-body">
+                        <div class="bp-form-group">
+                          <label class="bp-label">Título da Tarefa *</label>
+                          <input 
+                            type="text" 
+                            class="bp-input" 
+                            [(ngModel)]="task.title"
+                            [name]="'stage-' + si + '-task-title-' + ti"
+                            required
+                          />
+                        </div>
+
+                        <div class="bp-form-group">
+                          <label class="bp-label">Descrição</label>
+                          <textarea 
+                            class="bp-input" 
+                            [(ngModel)]="task.description"
+                            [name]="'stage-' + si + '-task-desc-' + ti"
+                            rows="2"
+                          ></textarea>
+                        </div>
+
+                        <!-- Subtarefas -->
+                        <div class="bp-mb-md">
+                          <div class="bp-flex bp-justify-between bp-items-center bp-mb-sm">
+                            <label class="bp-label">Subtarefas</label>
+                            <button 
+                              type="button"
+                              class="bp-btn bp-btn-sm bp-btn-secondary" 
+                              (click)="addSubtaskToStageTask(si, ti)"
+                            >
+                              + Subtarefa
+                            </button>
+                          </div>
+
+                          <div *ngFor="let subtask of task.subtasks; let sti = index" class="bp-flex bp-gap-sm bp-mb-sm">
+                            <input 
+                              type="text" 
+                              class="bp-input" 
+                              [(ngModel)]="subtask.description"
+                              [name]="'stage-' + si + '-task-' + ti + '-subtask-' + sti"
+                            />
+                            <button 
+                              type="button"
+                              class="bp-btn bp-btn-sm bp-btn-error" 
+                              (click)="removeSubtaskFromStageTask(si, ti, sti)"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <p *ngIf="stage.tasks.length === 0" class="bp-text-muted" style="text-align: center; padding: 1rem;">
+                      Nenhuma tarefa nesta etapa. Clique em "+ Tarefa" para adicionar.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <p *ngIf="templateForm.stages.length === 0" class="bp-text-muted" style="text-align: center; padding: 2rem; background: #f9f9f9; border-radius: 8px;">
+                Nenhuma etapa criada. As etapas organizam as tarefas do projeto em fases.<br>
+                Clique em "+ Adicionar Etapa" para começar.
+              </p>
+            </div>
+
+            <!-- Tarefas Sem Etapa (Legado) -->
+            <div class="bp-mb-lg" *ngIf="templateForm.tasks.length > 0">
+              <div class="bp-flex bp-justify-between bp-items-center bp-mb-md">
+                <div>
+                  <h4>Tarefas Avulsas</h4>
+                  <p class="bp-text-muted" style="font-size: 0.875rem;">Tarefas que não pertencem a nenhuma etapa</p>
+                </div>
+              </div>
+
+              <div *ngFor="let task of templateForm.tasks; let i = index" class="bp-card bp-mb-md">
+                <div class="bp-card-header">
+                  <div class="bp-flex bp-justify-between bp-items-center">
+                    <h5 class="bp-card-title">Tarefa #{{ i + 1 }}</h5>
+                    <button 
+                      type="button"
+                      class="bp-btn bp-btn-sm bp-btn-error" 
+                      (click)="removeTask(i)"
+                    >
+                      ✕ Remover
+                    </button>
+                  </div>
+                </div>
+                <div class="bp-card-body">
+                  <div class="bp-form-group">
+                    <label class="bp-label">Título da Tarefa *</label>
+                    <input 
+                      type="text" 
+                      class="bp-input" 
+                      [(ngModel)]="task.title"
+                      [name]="'task-title-' + i"
+                      required
+                    />
+                  </div>
+
+                  <div class="bp-form-group">
+                    <label class="bp-label">Descrição</label>
+                    <textarea 
+                      class="bp-input" 
+                      [(ngModel)]="task.description"
+                      [name]="'task-desc-' + i"
+                      rows="2"
+                    ></textarea>
+                  </div>
+
+                  <!-- Subtarefas -->
+                  <div class="bp-mb-md">
+                    <div class="bp-flex bp-justify-between bp-items-center bp-mb-sm">
+                      <label class="bp-label">Subtarefas</label>
+                      <button 
+                        type="button"
+                        class="bp-btn bp-btn-sm bp-btn-secondary" 
+                        (click)="addSubtask(i)"
+                      >
+                        + Subtarefa
+                      </button>
+                    </div>
+
+                    <div *ngFor="let subtask of task.subtasks; let j = index" class="bp-flex bp-gap-sm bp-mb-sm">
+                      <input 
+                        type="text" 
+                        class="bp-input" 
+                        [(ngModel)]="subtask.description"
+                        [name]="'subtask-' + i + '-' + j"
+                      />
+                      <button 
+                        type="button"
+                        class="bp-btn bp-btn-sm bp-btn-error" 
+                        (click)="removeSubtask(i, j)"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="bp-flex bp-gap-md">
+              <button 
+                type="submit" 
+                class="bp-btn bp-btn-primary"
+                [disabled]="saving()"
+              >
+                {{ saving() ? "Salvando..." : "Salvar Alterações" }}
+              </button>
+              <button 
+                type="button"
+                class="bp-btn bp-btn-secondary" 
+                (click)="cancel()"
+              >
+                Cancelar
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -14,12 +14,12 @@ import { AuthService } from '../services/auth.service';
         
         <ul class="bp-navbar-nav" *ngIf="authService.isAuthenticated(); else loggedOut">
           <li><a routerLink="/home" routerLinkActive="active" class="bp-nav-link">Dashboard</a></li>
-          <li><a routerLink="/projects" routerLinkActive="active" class="bp-nav-link">Projects</a></li>
+          <li><a routerLink="/projects" routerLinkActive="active" class="bp-nav-link">Meus Projetos</a></li>
           <li><a routerLink="/templates" routerLinkActive="active" class="bp-nav-link">Templates</a></li>
           <li *ngIf="authService.currentUser()?.role === 'ADMIN'">
-            <a routerLink="/admin/templates" routerLinkActive="active" class="bp-nav-link">Admin Templates</a>
+            <a routerLink="/admin/templates" routerLinkActive="active" class="bp-nav-link">Gerenciar Templates</a>
           </li>
-          <li><button (click)="logout()" class="bp-btn bp-btn-sm bp-btn-secondary">Logout</button></li>
+          <li><button (click)="logout()" class="bp-btn bp-btn-sm bp-btn-secondary">Sair</button></li>
         </ul>
         <ng-template #loggedOut>
           <ul class="bp-navbar-nav">
