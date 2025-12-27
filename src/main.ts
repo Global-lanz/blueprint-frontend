@@ -1,11 +1,29 @@
 import { bootstrapApplication } from '@angular/platform-browser';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
-import { HTTP_INTERCEPTORS } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, HttpClient } from '@angular/common/http';
+import { APP_INITIALIZER, importProvidersFrom } from '@angular/core';
 import { AppComponent } from './app/app.component';
 import { storeProviders } from './app/store';
 import { AuthInterceptor } from './app/interceptors/auth.interceptor';
 import { authGuard, adminGuard } from './app/guards/auth.guard';
+import { setRuntimeConfig } from './environments/environment';
+
+// Função para carregar configuração antes da inicialização do app
+export function initializeApp(http: HttpClient) {
+  return () =>
+    http
+      .get('/assets/config.json')
+      .toPromise()
+      .then((config: any) => {
+        setRuntimeConfig(config);
+        console.log('Configuração carregada:', config);
+      })
+      .catch((error) => {
+        console.warn('Usando configuração padrão (config.json não encontrado)', error);
+        setRuntimeConfig({ apiUrl: '/api' });
+      });
+}
 
 bootstrapApplication(AppComponent, {
   providers: [
@@ -28,5 +46,11 @@ bootstrapApplication(AppComponent, {
     provideHttpClient(withInterceptorsFromDi()),
     ...storeProviders,
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
+    {
+      provide: APP_INITIALIZER,
+      useFactory: initializeApp,
+      deps: [HttpClient],
+      multi: true
+    }
   ],
 });
