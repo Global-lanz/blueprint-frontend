@@ -28,7 +28,7 @@ import { AuthService } from '../../services/auth.service';
                 type="email" 
                 class="bp-input" 
                 formControlName="email"
-                placeholder="admin@blueprint.local"
+                placeholder="Digite seu email"
               />
               <div class="bp-error-message" *ngIf="loginForm.get('email')?.invalid && loginForm.get('email')?.touched">
                 Email válido é obrigatório
@@ -79,8 +79,8 @@ export class LoginComponent implements OnInit {
   error = signal<string | null>(null);
 
   loginForm = this.fb.group({
-    email: ['admin@blueprint.local', [Validators.required, Validators.email]],
-    password: ['admin123', [Validators.required, Validators.minLength(6)]],
+    email: ['', [Validators.required, Validators.email]],
+    password: ['', [Validators.required, Validators.minLength(6)]],
   });
 
   ngOnInit() {
