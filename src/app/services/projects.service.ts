@@ -11,6 +11,8 @@ export interface Project {
   status: string;
   createdAt: string;
   updatedAt: string;
+  stages?: any[];
+  tasks?: any[];
 }
 
 export interface CreateProjectDto {

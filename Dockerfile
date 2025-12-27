@@ -1,13 +1,16 @@
-FROM node:20-bullseye-slim as build
+# Stage 1: Build
+FROM node:20-alpine AS builder
 WORKDIR /app
-COPY package.json package-lock.json* ./
-RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates && rm -rf /var/lib/apt/lists/* \
- && if [ -f package-lock.json ]; then npm ci; else npm install; fi
+COPY package*.json ./
+RUN npm ci
 COPY . .
-RUN npm run build -- --output-path=dist
+RUN npm run build
 
+# Stage 2: Production
 FROM nginx:stable-alpine
-COPY --from=build /app/dist /usr/share/nginx/html
+COPY --from=builder /app/dist/ /usr/share/nginx/html/
 COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
 EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
+ENTRYPOINT ["/docker-entrypoint.sh"]

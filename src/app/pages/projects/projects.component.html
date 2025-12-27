@@ -1,0 +1,45 @@
+<div class="bp-page">
+  <div class="bp-container">
+    <app-breadcrumb></app-breadcrumb>
+    
+    <div class="bp-flex bp-justify-between bp-items-center bp-mb-2xl">
+      <div>
+        <h1>Meus Projetos</h1>
+        <p class="bp-text-muted">Gerencie e acompanhe seus projetos de produtos digitais</p>
+      </div>
+      <button 
+        routerLink="/templates"
+        class="bp-btn bp-btn-primary"
+      >
+        ✨ Criar Novo Projeto
+      </button>
+    </div>
+
+    <div class="bp-loading" *ngIf="loading()">
+      <div class="bp-spinner"></div>
+    </div>
+    
+    <div class="bp-card bp-text-center" *ngIf="!loading() && projects().length === 0">
+      <div style="padding: 4rem 2rem;">
+        <p style="font-size: 4rem; margin-bottom: 1rem;">📋</p>
+        <h3>Nenhum projeto ainda</h3>
+        <p class="bp-text-muted bp-mb-lg">Crie seu primeiro projeto a partir de um template</p>
+        <button 
+          routerLink="/templates"
+          class="bp-btn bp-btn-primary"
+        >
+          Criar Novo Projeto
+        </button>
+      </div>
+    </div>
+    
+    <div class="bp-card" *ngIf="!loading() && projects().length > 0">
+      <app-projects-table 
+        [projects]="projects()" 
+        [showManageButton]="true"
+        [showDeleteButton]="true"
+        (onDelete)="deleteProject($event)"
+      ></app-projects-table>
+    </div>
+  </div>
+</div>
