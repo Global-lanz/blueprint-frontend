@@ -8,7 +8,6 @@ export interface Template {
   name: string;
   description: string;
   isActive: boolean;
-  version: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -49,7 +48,7 @@ export class TemplatesService {
     return this.http.delete<void>(`${this.apiUrl}/templates/${id}`);
   }
 
-  createVersion(id: string): Observable<Template> {
-    return this.http.post<Template>(`${this.apiUrl}/templates/${id}/version`, {});
+  toggleActive(id: string, isActive: boolean): Observable<Template> {
+    return this.http.patch<Template>(`${this.apiUrl}/templates/${id}`, { isActive });
   }
 }
