@@ -12,7 +12,7 @@ import { AuthService } from '../../services/auth.service';
     <div class="bp-page bp-flex bp-items-center bp-justify-center">
       <div class="bp-card" style="max-width: 450px; width: 100%;">
         <div class="bp-card-header bp-text-center">
-          <h2 class="bp-card-title">Bem-vindo ao BluePrint</h2>
+          <h2 class="bp-card-title">Bem-vindo(a) ao BluePrint</h2>
           <p class="bp-text-muted">Faça login para criar e gerenciar seus produtos digitais</p>
         </div>
 
@@ -48,29 +48,23 @@ import { AuthService } from '../../services/auth.service';
               </div>
             </div>
 
-            <button 
-              type="submit" 
-              class="bp-btn bp-btn-primary bp-btn-lg" 
-              style="width: 100%;"
-              [disabled]="loading() || loginForm.invalid"
-            >
-              <ng-container *ngIf="loading(); else signInText">
-                <div class="bp-spinner" style="width: 20px; height: 20px; border-width: 2px;"></div>
-                <span>Entrando...</span>
-              </ng-container>
-              <ng-template #signInText>
-                <span>Entrar</span>
-              </ng-template>
-            </button>
-          </form>
-
-          <div class="bp-alert bp-alert-info bp-mt-lg">
-            <div>
-              <strong>Credenciais de Teste:</strong><br/>
-              Email: <code>admin@blueprint.local</code><br/>
-              Senha: <code>admin123</code>
+            <div style="display: flex; justify-content: center;">
+              <button 
+                type="submit" 
+                class="bp-btn bp-btn-primary bp-btn-lg" 
+                style="width: 100%; justify-content: center;"
+                [disabled]="loading() || loginForm.invalid"
+              >
+                <ng-container *ngIf="loading(); else signInText">
+                  <div class="bp-spinner" style="width: 20px; height: 20px; border-width: 2px;"></div>
+                  <span>Entrando...</span>
+                </ng-container>
+                <ng-template #signInText>
+                  <span>Login</span>
+                </ng-template>
+              </button>
             </div>
-          </div>
+          </form>
         </div>
       </div>
     </div>

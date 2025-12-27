@@ -1,10 +1,18 @@
 <div class="bp-page">
   <div class="bp-container">
+    <app-breadcrumb></app-breadcrumb>
+    
     <div class="bp-flex bp-justify-between bp-items-center bp-mb-2xl">
       <div>
         <h1>Meus Projetos</h1>
         <p class="bp-text-muted">Gerencie e acompanhe seus projetos de produtos digitais</p>
       </div>
+      <button 
+        routerLink="/templates"
+        class="bp-btn bp-btn-primary"
+      >
+        ✨ Criar Novo Projeto
+      </button>
     </div>
 
     <div class="bp-loading" *ngIf="loading()">
@@ -20,62 +28,18 @@
           routerLink="/templates"
           class="bp-btn bp-btn-primary"
         >
-          Explorar Templates
+          Criar Novo Projeto
         </button>
       </div>
     </div>
     
     <div class="bp-card" *ngIf="!loading() && projects().length > 0">
-      <table class="bp-table">
-        <thead>
-          <tr>
-            <th>Nome do Projeto</th>
-            <th>Template</th>
-            <th>Criado em</th>
-            <th>Progresso</th>
-            <th>Ações</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let project of projects()">
-            <td>
-              <strong>{{ project.name }}</strong>
-            </td>
-            <td class="bp-text-muted">
-              {{ project.template?.name || 'N/A' }}
-              <span class="bp-badge bp-badge-primary bp-ml-sm" *ngIf="project.templateVersion">v{{ project.templateVersion }}</span>
-            </td>
-            <td class="bp-text-muted">
-              {{ formatDate(project.createdAt) }}
-            </td>
-            <td>
-              <div class="bp-progress">
-                <div 
-                  class="bp-progress-bar" 
-                  [style.width]="project.progress + '%'"
-                ></div>
-              </div>
-              <span class="bp-text-muted bp-text-sm">{{ project.progress.toFixed(0) }}%</span>
-            </td>
-            <td>
-              <div class="bp-flex bp-gap-sm">
-                <button 
-                  [routerLink]="['/projects', project.id]"
-                  class="bp-btn bp-btn-sm bp-btn-primary"
-                >
-                  Abrir
-                </button>
-                <button 
-                  (click)="deleteProject(project.id)"
-                  class="bp-btn bp-btn-sm bp-btn-danger"
-                >
-                  Excluir
-                </button>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <app-projects-table 
+        [projects]="projects()" 
+        [showManageButton]="true"
+        [showDeleteButton]="true"
+        (onDelete)="deleteProject($event)"
+      ></app-projects-table>
     </div>
   </div>
 </div>

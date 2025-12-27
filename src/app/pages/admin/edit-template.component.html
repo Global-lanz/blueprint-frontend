@@ -1,5 +1,7 @@
 <div class="bp-page">
   <div class="bp-container">
+    <app-breadcrumb></app-breadcrumb>
+    
     <div class="bp-loading" *ngIf="loading()">
       <div class="bp-spinner"></div>
     </div>
@@ -7,12 +9,27 @@
     <div *ngIf="!loading()">
       <div class="bp-flex bp-justify-between bp-items-center bp-mb-2xl">
         <div>
-          <h1>Editar Template de Projeto</h1>
-          <p class="bp-text-muted">Modifique as informações e tarefas do template</p>
+          <div class="bp-flex bp-items-center bp-gap-md bp-mb-sm">
+            <h1 style="margin: 0;">{{ templateId ? 'Editar Template de Projeto' : 'Criar Novo Template' }}</h1>
+            <span *ngIf="templateId" class="bp-badge" [class.bp-badge-success]="isActive()" [class.bp-badge-warning]="!isActive()">
+              {{ isActive() ? "Ativo" : "Inativo" }}
+            </span>
+          </div>
+          <p class="bp-text-muted">{{ templateId ? 'Modifique as informações e tarefas do template' : 'Crie um novo template de projeto com etapas e tarefas' }}</p>
         </div>
-        <button class="bp-btn bp-btn-secondary" (click)="cancel()">
-          ← Voltar
-        </button>
+        <div class="bp-flex bp-gap-md">
+          <button 
+            *ngIf="templateId"
+            type="button" 
+            (click)="toggleActive()" 
+            [class]="isActive() ? 'bp-btn bp-btn-warning' : 'bp-btn bp-btn-success'"
+          >
+            {{ isActive() ? "🔒 Desativar" : "✓ Ativar" }}
+          </button>
+          <button type="button" class="bp-btn bp-btn-secondary" (click)="cancel()">
+            ← Voltar
+          </button>
+        </div>
       </div>
 
       <div class="bp-card">
@@ -30,19 +47,6 @@
               />
             </div>
 
-            <div class="bp-grid bp-grid-2 bp-gap-md">
-              <div class="bp-form-group">
-                <label class="bp-label">Versão *</label>
-                <input 
-                  type="text" 
-                  class="bp-input" 
-                  [(ngModel)]="templateForm.version"
-                  name="version"
-                  required
-                />
-              </div>
-            </div>
-
             <div class="bp-form-group">
               <label class="bp-label">Descrição</label>
               <textarea 
@@ -57,29 +61,31 @@
             <div class="bp-mb-lg">
               <div class="bp-flex bp-justify-between bp-items-center bp-mb-md">
                 <h4>Etapas do Projeto</h4>
-                <button 
-                  type="button"
-                  class="bp-btn bp-btn-sm bp-btn-primary" 
-                  (click)="addStage()"
-                >
-                  + Adicionar Etapa
-                </button>
               </div>
 
               <div *ngFor="let stage of templateForm.stages; let si = index" class="bp-card bp-mb-lg" style="border-left: 4px solid #4f46e5;">
-                <div class="bp-card-header" style="background: #f5f5ff;">
+                <div 
+                  class="bp-card-header" 
+                  style="background: #f5f5ff; cursor: pointer;"
+                  (click)="toggleStage(si)"
+                >
                   <div class="bp-flex bp-justify-between bp-items-center">
-                    <h4 class="bp-card-title" style="color: #4f46e5;">📋 Etapa #{{ si + 1 }}</h4>
+                    <div class="bp-flex bp-items-center bp-gap-sm">
+                      <span style="color: #4f46e5; font-size: 0.875rem; width: 1rem;">{{ isStageExpanded(si) ? '▼' : '▶' }}</span>
+                      <span *ngIf="stage.gemType" [innerHTML]="getGemIcon(stage.gemType)" style="display: flex; align-items: center;"></span>
+                      <h4 class="bp-card-title" style="color: #4f46e5; margin: 0;">Etapa #{{ si + 1 }} - {{ stage.name || 'Nova Etapa' }}</h4>
+                    </div>
                     <button 
                       type="button"
                       class="bp-btn bp-btn-sm bp-btn-error" 
-                      (click)="removeStage(si)"
+                      (click)="removeStage(si); $event.stopPropagation()"
+                      title="Remover Etapa"
                     >
-                      ✕ Remover Etapa
+                      🗑️
                     </button>
                   </div>
                 </div>
-                <div class="bp-card-body">
+                <div class="bp-card-body" *ngIf="isStageExpanded(si)">
                   <div class="bp-form-group">
                     <label class="bp-label">Nome da Etapa *</label>
                     <input 
@@ -101,6 +107,24 @@
                       placeholder="Descreva o que será feito nesta etapa..."
                       rows="2"
                     ></textarea>
+                  </div>
+
+                  <div class="bp-form-group">
+                    <label class="bp-label">Tipo de Pedra *</label>
+                    <div class="bp-flex bp-items-center bp-gap-sm">
+                      <span *ngIf="stage.gemType" [innerHTML]="getGemIcon(stage.gemType)" style="display: flex; align-items: center;"></span>
+                      <select 
+                        class="bp-input" 
+                        [(ngModel)]="stage.gemType"
+                        [name]="'stage-gemType-' + si"
+                        required
+                        style="flex: 1;"
+                      >
+                        <option *ngFor="let gem of gemTypes" [value]="gem.value">
+                          {{ gem.label }}
+                        </option>
+                      </select>
+                    </div>
                   </div>
 
                   <!-- Tarefas da Etapa -->
@@ -190,9 +214,20 @@
                 </div>
               </div>
 
-              <p *ngIf="templateForm.stages.length === 0" class="bp-text-muted" style="text-align: center; padding: 2rem; background: #f9f9f9; border-radius: 8px;">
+              <!-- Botão para adicionar nova etapa -->
+              <div class="bp-flex bp-justify-center bp-mt-md">
+                <button 
+                  type="button"
+                  class="bp-btn bp-btn-primary" 
+                  (click)="addStage()"
+                >
+                  + Adicionar Nova Etapa
+                </button>
+              </div>
+
+              <p *ngIf="templateForm.stages.length === 0" class="bp-text-muted" style="text-align: center; padding: 2rem; background: #f9f9f9; border-radius: 8px; margin-top: 1rem;">
                 Nenhuma etapa criada. As etapas organizam as tarefas do projeto em fases.<br>
-                Clique em "+ Adicionar Etapa" para começar.
+                Clique em "+ Adicionar Nova Etapa" para começar.
               </p>
             </div>
 
@@ -279,7 +314,7 @@
                 class="bp-btn bp-btn-primary"
                 [disabled]="saving()"
               >
-                {{ saving() ? "Salvando..." : "Salvar Alterações" }}
+                {{ saving() ? "Salvando..." : (templateId ? "Salvar Alterações" : "Criar Template") }}
               </button>
               <button 
                 type="button"

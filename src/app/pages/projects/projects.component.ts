@@ -2,11 +2,26 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
+import { ConfirmService } from '../../services/confirm.service';
+import { BreadcrumbComponent } from '../../components/breadcrumb.component';
+import { ProjectsTableComponent } from '../../components/projects-table.component';
 
 interface Template {
   id: string;
   name: string;
   version: string;
+}
+
+interface ProjectStage {
+  id: string;
+  name: string;
+  order: number;
+  gemType: string;
+  tasks: {
+    id: string;
+    completed: boolean;
+    subtasks: { completed: boolean }[];
+  }[];
 }
 
 interface Project {
@@ -18,16 +33,19 @@ interface Project {
   createdAt: string;
   template?: Template;
   projectTasks?: any[];
+  projectStages?: ProjectStage[];
+  currentGem?: string;
 }
 
 @Component({
   selector: 'app-projects',
   templateUrl: './projects.component.html',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, BreadcrumbComponent, ProjectsTableComponent],
 })
 export class ProjectsComponent implements OnInit {
   private http = inject(HttpClient);
+  private confirm = inject(ConfirmService);
 
   projects = signal<Project[]>([]);
   loading = signal(true);
@@ -48,7 +66,13 @@ export class ProjectsComponent implements OnInit {
   }
 
   async deleteProject(id: string) {
-    if (!confirm('Tem certeza que deseja excluir este projeto?')) return;
+    const confirmed = await this.confirm.confirm(
+      'Excluir Projeto',
+      'Tem certeza que deseja excluir este projeto? Todos os dados serão perdidos permanentemente.',
+      { type: 'danger', confirmText: 'Sim, excluir' }
+    );
+
+    if (!confirmed) return;
 
     try {
       await this.http.delete(`/api/projects/${id}`).toPromise();
