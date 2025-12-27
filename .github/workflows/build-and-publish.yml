@@ -31,6 +31,18 @@ jobs:
       - name: Build application
         run: npm run build -- --configuration production
 
+      - name: Verify and prepare dist folder
+        run: |
+          echo "Checking dist folder structure..."
+          ls -la dist/ || true
+          if [ -d "dist/blueprint-frontend" ]; then
+            echo "Moving files from dist/blueprint-frontend to dist/"
+            mv dist/blueprint-frontend/* dist/ || true
+            rm -rf dist/blueprint-frontend
+          fi
+          echo "Final dist structure:"
+          ls -la dist/
+
       - name: Get version from package.json
         id: get_version
         run: |
