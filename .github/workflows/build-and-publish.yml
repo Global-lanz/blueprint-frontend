@@ -43,6 +43,15 @@ jobs:
           echo "Final dist structure:"
           ls -la dist/
 
+      - name: Verify files before Docker build
+        run: |
+          echo "Current directory contents:"
+          ls -la
+          echo "Dist folder contents:"
+          ls -la dist/
+          echo "Checking .dockerignore:"
+          cat .dockerignore || echo "No .dockerignore file"
+
       - name: Get version from package.json
         id: get_version
         run: |
