@@ -1,0 +1,91 @@
+<div class="bp-page">
+  <div class="bp-container">
+    <div class="bp-loading" *ngIf="loading()">
+      <div class="bp-spinner"></div>
+    </div>
+
+    <div *ngIf="!loading()">
+      <div class="bp-flex bp-justify-between bp-items-center bp-mb-2xl">
+        <div>
+          <h1>Criar Novo Projeto</h1>
+          <p class="bp-text-muted">Baseado no template: <strong>{{ template()?.name }}</strong></p>
+        </div>
+        <button class="bp-btn bp-btn-secondary" (click)="cancel()">
+          ← Cancelar
+        </button>
+      </div>
+
+      <div class="bp-card" *ngIf="template()">
+        <div class="bp-card-body">
+          <form (ngSubmit)="createProject()">
+            <div class="bp-form-group">
+              <label class="bp-label">Nome do Projeto *</label>
+              <input 
+                type="text" 
+                class="bp-input" 
+                [(ngModel)]="projectName"
+                name="projectName"
+                placeholder="Digite o nome do seu projeto"
+                required
+                autofocus
+              />
+              <small class="bp-text-muted">Escolha um nome descritivo para seu projeto</small>
+            </div>
+
+            <!-- Preview do Template -->
+            <div class="bp-card bp-bg-light bp-mt-lg">
+              <div class="bp-card-header">
+                <h4 class="bp-card-title">Resumo do Template</h4>
+              </div>
+              <div class="bp-card-body">
+                <div class="bp-mb-md">
+                  <strong>{{ template()!.name }}</strong>
+                  <span class="bp-badge bp-badge-primary bp-ml-sm">v{{ template()!.version }}</span>
+                </div>
+                <p class="bp-text-muted bp-mb-md" *ngIf="template()!.description">
+                  {{ template()!.description }}
+                </p>
+                <div class="bp-flex bp-items-center bp-gap-md">
+                  <span class="bp-badge bp-badge-secondary">
+                    📋 {{ template()!.tasks.length }} tarefas
+                  </span>
+                  <span class="bp-badge bp-badge-secondary">
+                    ✓ {{ countSubtasks() }} subtarefas
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div class="bp-flex bp-gap-md bp-mt-lg">
+              <button 
+                type="submit" 
+                class="bp-btn bp-btn-primary"
+                [disabled]="saving() || !projectName.trim()"
+              >
+                {{ saving() ? "Criando..." : "✨ Criar Projeto" }}
+              </button>
+              <button 
+                type="button"
+                class="bp-btn bp-btn-secondary" 
+                (click)="cancel()"
+              >
+                Cancelar
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div *ngIf="!template()" class="bp-card bp-text-center">
+        <div style="padding: 4rem 2rem;">
+          <p style="font-size: 4rem; margin-bottom: 1rem;">❌</p>
+          <h3>Template não encontrado</h3>
+          <p class="bp-text-muted bp-mb-lg">O template que você está procurando não existe.</p>
+          <button routerLink="/templates" class="bp-btn bp-btn-primary">
+            Voltar para Templates
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

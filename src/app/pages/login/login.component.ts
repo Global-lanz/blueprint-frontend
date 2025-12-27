@@ -12,8 +12,8 @@ import { AuthService } from '../../services/auth.service';
     <div class="bp-page bp-flex bp-items-center bp-justify-center">
       <div class="bp-card" style="max-width: 450px; width: 100%;">
         <div class="bp-card-header bp-text-center">
-          <h2 class="bp-card-title">Welcome to BluePrint</h2>
-          <p class="bp-text-muted">Sign in to create and manage your digital products</p>
+          <h2 class="bp-card-title">Bem-vindo(a) ao BluePrint</h2>
+          <p class="bp-text-muted">Faça login para criar e gerenciar seus produtos digitais</p>
         </div>
 
         <div class="bp-card-body">
@@ -31,46 +31,40 @@ import { AuthService } from '../../services/auth.service';
                 placeholder="admin@blueprint.local"
               />
               <div class="bp-error-message" *ngIf="loginForm.get('email')?.invalid && loginForm.get('email')?.touched">
-                Valid email is required
+                Email válido é obrigatório
               </div>
             </div>
 
             <div class="bp-form-group">
-              <label class="bp-label">Password</label>
+              <label class="bp-label">Senha</label>
               <input 
                 type="password" 
                 class="bp-input" 
                 formControlName="password"
-                placeholder="Enter your password"
+                placeholder="Digite sua senha"
               />
               <div class="bp-error-message" *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched">
-                Password is required
+                Senha é obrigatória
               </div>
             </div>
 
-            <button 
-              type="submit" 
-              class="bp-btn bp-btn-primary bp-btn-lg" 
-              style="width: 100%;"
-              [disabled]="loading() || loginForm.invalid"
-            >
-              <ng-container *ngIf="loading(); else signInText">
-                <div class="bp-spinner" style="width: 20px; height: 20px; border-width: 2px;"></div>
-                <span>Signing in...</span>
-              </ng-container>
-              <ng-template #signInText>
-                <span>Sign In</span>
-              </ng-template>
-            </button>
-          </form>
-
-          <div class="bp-alert bp-alert-info bp-mt-lg">
-            <div>
-              <strong>Demo Credentials:</strong><br/>
-              Email: <code>admin@blueprint.local</code><br/>
-              Password: <code>admin123</code>
+            <div style="display: flex; justify-content: center;">
+              <button 
+                type="submit" 
+                class="bp-btn bp-btn-primary bp-btn-lg" 
+                style="width: 100%; justify-content: center;"
+                [disabled]="loading() || loginForm.invalid"
+              >
+                <ng-container *ngIf="loading(); else signInText">
+                  <div class="bp-spinner" style="width: 20px; height: 20px; border-width: 2px;"></div>
+                  <span>Entrando...</span>
+                </ng-container>
+                <ng-template #signInText>
+                  <span>Login</span>
+                </ng-template>
+              </button>
             </div>
-          </div>
+          </form>
         </div>
       </div>
     </div>
@@ -104,9 +98,24 @@ export class LoginComponent implements OnInit {
     const { email, password } = this.loginForm.value;
 
     this.authService.login(email!, password!).subscribe({
-      next: () => {
-        this.loading.set(false);
-        this.router.navigate(['/home']);
+      next: (response) => {
+        // Se não recebeu o user na resposta, busca separadamente
+        if (!response.user) {
+          this.authService.getMe().subscribe({
+            next: () => {
+              this.loading.set(false);
+              this.router.navigate(['/home']);
+            },
+            error: (err) => {
+              console.error('Failed to get user:', err);
+              this.loading.set(false);
+              this.router.navigate(['/home']);
+            }
+          });
+        } else {
+          this.loading.set(false);
+          this.router.navigate(['/home']);
+        }
       },
       error: (err) => {
         this.loading.set(false);

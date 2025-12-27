@@ -8,6 +8,8 @@
     "emitDecoratorMetadata": true,
     "lib": ["es2020", "dom"],
     "skipLibCheck": true,
-    "types": ["node"]
+    "types": ["node"],
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true
   }
 }
