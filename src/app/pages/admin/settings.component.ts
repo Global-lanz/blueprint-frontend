@@ -176,7 +176,7 @@ interface Template {
               <div class="info-grid">
                 <div class="info-item">
                   <span class="info-label">🎨 Frontend:</span>
-                  <span class="info-value"><code>v{{ version }}</code></span>
+                  <span class="info-value"><code>v{{ version() }}</code></span>
                 </div>
                 <div class="info-item">
                   <span class="info-label">⚙️ Backend:</span>
@@ -404,7 +404,7 @@ interface Template {
 export class SettingsComponent implements OnInit {
   licenseDuration = 365;
   environment = environment;
-  version = packageInfo.version;
+  version = signal<string>(packageInfo.version);
   backendVersion = signal<string>('...');
   templates: Template[] = [];
   selectedTemplateId: string | null = null;
@@ -421,6 +421,7 @@ export class SettingsComponent implements OnInit {
   ngOnInit() {
     this.loadSettings();
     this.loadTemplates();
+    this.loadFrontendVersion();
     this.loadBackendVersion();
   }
 
@@ -590,6 +591,19 @@ export class SettingsComponent implements OnInit {
       },
       error: () => {
         this.backendVersion.set('N/A');
+      }
+    });
+  }
+
+  loadFrontendVersion() {
+    // Try to load version from version.json (Docker build)
+    this.http.get<{ version: string }>('/version.json').subscribe({
+      next: (data) => {
+        this.version.set(data.version);
+      },
+      error: () => {
+        // Fallback to package.json version (already set)
+        this.version.set(packageInfo.version);
       }
     });
   }
