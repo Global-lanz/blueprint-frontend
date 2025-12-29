@@ -3,6 +3,8 @@ name: Build and Publish Docker Image
 on:
   push:
     branches: [ "main" ]
+    tags:
+      - 'RC.*'
   pull_request:
     branches: [ "main" ]
 
@@ -80,9 +82,15 @@ jobs:
       - name: Set Docker tags
         id: set_tags
         run: |
-          if [ "${{ github.event_name }}" == "push" ]; then
+          if [[ "${{ github.ref }}" == refs/tags/RC.* ]]; then
+            # Tag RC manual
+            TAG_NAME="${GITHUB_REF#refs/tags/}"
+            echo "tags=${{ env.IMAGE_NAME }}:$TAG_NAME" >> $GITHUB_OUTPUT
+          elif [ "${{ github.event_name }}" == "push" ] && [ "${{ github.ref }}" == "refs/heads/main" ]; then
+            # Push para main (merge)
             echo "tags=${{ env.IMAGE_NAME }}:${{ env.VERSION }},${{ env.IMAGE_NAME }}:latest" >> $GITHUB_OUTPUT
           elif [ "${{ github.event_name }}" == "pull_request" ] && [ "${{ contains(github.event.pull_request.labels.*.name, 'RC') }}" == "true" ]; then
+            # PR com label RC
             echo "tags=${{ env.IMAGE_NAME }}:${{ steps.rc_version.outputs.rc_version }}" >> $GITHUB_OUTPUT
           fi
 

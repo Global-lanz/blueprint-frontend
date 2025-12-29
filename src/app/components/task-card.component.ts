@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { ToastService } from '../services/toast.service';
+import { environment } from '../../environments/environment';
 
 interface Subtask {
   id: string;
@@ -313,7 +314,7 @@ export class TaskCardComponent {
     }
 
     try {
-      await this.http.patch(`/api/projects/${this.projectId}/tasks/${this.task.id}/link`, { link }).toPromise();
+      await this.http.patch(`${environment.apiUrl}/projects/${this.projectId}/tasks/${this.task.id}/link`, { link }).toPromise();
       this.task.link = link;
       this.editingTaskLink = false;
       this.tempTaskLink = '';
@@ -327,7 +328,7 @@ export class TaskCardComponent {
 
   async removeTaskLink() {
     try {
-      await this.http.patch(`/api/projects/${this.projectId}/tasks/${this.task.id}/link`, { link: null }).toPromise();
+      await this.http.patch(`${environment.apiUrl}/projects/${this.projectId}/tasks/${this.task.id}/link`, { link: null }).toPromise();
       this.task.link = undefined;
       this.toast.success('Link da tarefa removido!');
       this.taskUpdated.emit();
@@ -340,7 +341,7 @@ export class TaskCardComponent {
   // Subtask methods
   async onToggleSubtask(subtask: Subtask) {
     try {
-      const response: any = await this.http.patch(`/api/projects/${this.projectId}/subtasks/${subtask.id}/toggle`, {}).toPromise();
+      const response: any = await this.http.patch(`${environment.apiUrl}/projects/${this.projectId}/subtasks/${subtask.id}/toggle`, {}).toPromise();
       subtask.completed = !subtask.completed;
       this.toast.success(subtask.completed ? 'Subtarefa concluída!' : 'Subtarefa reaberta');
       this.taskUpdated.emit();
@@ -352,7 +353,7 @@ export class TaskCardComponent {
 
   async onSubtaskAnswerChange(subtask: Subtask) {
     try {
-      await this.http.patch(`/api/projects/${this.projectId}/subtasks/${subtask.id}/answer`, {
+      await this.http.patch(`${environment.apiUrl}/projects/${this.projectId}/subtasks/${subtask.id}/answer`, {
         answer: subtask.answer || ''
       }).toPromise();
     } catch (err) {
@@ -383,7 +384,7 @@ export class TaskCardComponent {
     }
 
     try {
-      await this.http.patch(`/api/projects/${this.projectId}/subtasks/${subtask.id}/link`, { link }).toPromise();
+      await this.http.patch(`${environment.apiUrl}/projects/${this.projectId}/subtasks/${subtask.id}/link`, { link }).toPromise();
       subtask.link = link;
       this.editingSubtaskLinks.delete(subtask.id);
       delete this.tempSubtaskLinks[subtask.id];
@@ -397,7 +398,7 @@ export class TaskCardComponent {
 
   async removeSubtaskLink(subtask: Subtask) {
     try {
-      await this.http.patch(`/api/projects/${this.projectId}/subtasks/${subtask.id}/link`, { link: null }).toPromise();
+      await this.http.patch(`${environment.apiUrl}/projects/${this.projectId}/subtasks/${subtask.id}/link`, { link: null }).toPromise();
       subtask.link = undefined;
       this.toast.success('Link da subtarefa removido!');
       this.taskUpdated.emit();

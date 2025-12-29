@@ -10,6 +10,7 @@ import { ToastService } from '../../services/toast.service';
 import { BreadcrumbComponent } from '../../components/breadcrumb.component';
 import { TaskDetailModalComponent } from '../../components/task-detail-modal.component';
 import { ProjectsTableComponent } from '../../components/projects-table.component';
+import { environment } from '../../../environments/environment';
 
 interface Subtask {
   id: string;
@@ -338,7 +339,7 @@ export class HomeComponent implements OnInit {
 
   loadProjects() {
     this.loadingProjects.set(true);
-    this.http.get<ProjectItem[]>('/api/projects/my').subscribe({
+    this.http.get<ProjectItem[]>(`${environment.apiUrl}/projects/my`).subscribe({
       next: (data) => {
         this.projects.set(data || []);
         this.loadingProjects.set(false);

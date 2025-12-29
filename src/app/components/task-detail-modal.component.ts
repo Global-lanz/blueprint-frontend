@@ -5,6 +5,7 @@ import { HttpClient } from '@angular/common/http';
 import { ToastService } from '../services/toast.service';
 import { GemAchievementModalComponent } from './gem-achievement-modal.component';
 import { GemUtilsService } from '../services/gem-utils.service';
+import { environment } from '../../environments/environment';
 
 interface Subtask {
   id: string;
@@ -413,7 +414,7 @@ export class TaskDetailModalComponent {
     if (!this.projectId || !subtask.id) return;
 
     try {
-      const response: any = await this.http.patch(`/api/projects/${this.projectId}/subtasks/${subtask.id}/toggle`, {}).toPromise();
+      const response: any = await this.http.patch(`${environment.apiUrl}/projects/${this.projectId}/subtasks/${subtask.id}/toggle`, {}).toPromise();
       subtask.completed = !subtask.completed;
       this.toast.success(subtask.completed ? 'Subtarefa concluída!' : 'Subtarefa reaberta');
       
@@ -434,7 +435,7 @@ export class TaskDetailModalComponent {
     if (!this.projectId || !subtask.id) return;
 
     try {
-      await this.http.patch(`/api/projects/${this.projectId}/subtasks/${subtask.id}/answer`, {
+      await this.http.patch(`${environment.apiUrl}/projects/${this.projectId}/subtasks/${subtask.id}/answer`, {
         answer: subtask.answer || ''
       }).toPromise();
       this.toast.success('Resposta salva!');
@@ -486,7 +487,7 @@ export class TaskDetailModalComponent {
     if (!this.projectId || !this.task?.id) return;
 
     try {
-      await this.http.patch(`/api/projects/${this.projectId}/tasks/${this.task.id}/link`, {
+      await this.http.patch(`${environment.apiUrl}/projects/${this.projectId}/tasks/${this.task.id}/link`, {
         link: null
       }).toPromise();
       
@@ -549,7 +550,7 @@ export class TaskDetailModalComponent {
     if (!this.projectId || !subtask.id) return;
 
     try {
-      await this.http.patch(`/api/projects/${this.projectId}/subtasks/${subtask.id}/link`, {
+      await this.http.patch(`${environment.apiUrl}/projects/${this.projectId}/subtasks/${subtask.id}/link`, {
         link: null
       }).toPromise();
       
