@@ -6,6 +6,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { ToastService } from '../../services/toast.service';
 import { BreadcrumbComponent } from '../../components/breadcrumb.component';
+import { environment } from '../../../environments/environment';
 
 interface Subtask {
   id?: string;
@@ -75,7 +76,7 @@ export class EditTemplateComponent implements OnInit {
 
   async loadTemplate(id: string) {
     try {
-      const data = await this.http.get<any>(`/api/templates/${id}`).toPromise();
+      const data = await this.http.get<any>(`${environment.apiUrl}/templates/${id}`).toPromise();
       this.isActive.set(data.isActive ?? true);
       this.templateForm = {
         name: data.name,
@@ -209,11 +210,11 @@ export class EditTemplateComponent implements OnInit {
     try {
       if (this.templateId) {
         // Modo de edição
-        await this.http.put(`/api/templates/${this.templateId}`, this.templateForm).toPromise();
+        await this.http.put(`${environment.apiUrl}/templates/${this.templateId}`, this.templateForm).toPromise();
         this.toast.success('Template atualizado com sucesso!');
       } else {
         // Modo de criação
-        await this.http.post('/api/templates', this.templateForm).toPromise();
+        await this.http.post(`${environment.apiUrl}/templates`, this.templateForm).toPromise();
         this.toast.success('Template criado com sucesso!');
       }
       this.router.navigate(['/templates']);
@@ -237,7 +238,7 @@ export class EditTemplateComponent implements OnInit {
 
     try {
       const updated = await this.http.patch<any>(
-        `/api/templates/${this.templateId}/toggle-active`,
+        `${environment.apiUrl}/templates/${this.templateId}/toggle-active`,
         {}
       ).toPromise();
       

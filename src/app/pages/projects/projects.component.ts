@@ -5,6 +5,7 @@ import { HttpClient } from '@angular/common/http';
 import { ConfirmService } from '../../services/confirm.service';
 import { BreadcrumbComponent } from '../../components/breadcrumb.component';
 import { ProjectsTableComponent } from '../../components/projects-table.component';
+import { environment } from '../../../environments/environment';
 
 interface Template {
   id: string;
@@ -56,7 +57,7 @@ export class ProjectsComponent implements OnInit {
 
   async loadProjects() {
     try {
-      const data = await this.http.get<Project[]>('/api/projects/my').toPromise();
+      const data = await this.http.get<Project[]>(`${environment.apiUrl}/projects/my`).toPromise();
       this.projects.set(data || []);
     } catch (err) {
       console.error('Failed to load projects:', err);
@@ -75,7 +76,7 @@ export class ProjectsComponent implements OnInit {
     if (!confirmed) return;
 
     try {
-      await this.http.delete(`/api/projects/${id}`).toPromise();
+      await this.http.delete(`${environment.apiUrl}/projects/${id}`).toPromise();
       this.projects.set(this.projects().filter(p => p.id !== id));
     } catch (err) {
       console.error('Failed to delete project:', err);
