@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { ToastService } from '../../services/toast.service';
+import { environment } from '../../../environments/environment';
 
 interface Template {
   id: string;
@@ -39,7 +40,7 @@ export class CreateProjectComponent implements OnInit {
 
   async loadTemplate(id: string) {
     try {
-      const data = await this.http.get<Template>(`/api/templates/${id}`).toPromise();
+      const data = await this.http.get<Template>(`${environment.apiUrl}/templates/${id}`).toPromise();
       this.template.set(data as Template);
       // Sugerir nome baseado no template
       this.projectName = `Meu ${data!.name}`;
@@ -70,7 +71,7 @@ export class CreateProjectComponent implements OnInit {
         templateId: this.template()!.id
       };
       
-      await this.http.post('/api/projects', payload).toPromise();
+      await this.http.post(`${environment.apiUrl}/projects`, payload).toPromise();
       this.toast.success('Projeto criado com sucesso!');
       this.router.navigate(['/projects']);
     } catch (err: any) {

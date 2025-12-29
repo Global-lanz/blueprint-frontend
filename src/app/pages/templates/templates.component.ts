@@ -6,6 +6,7 @@ import { Router } from '@angular/router';
 import { TemplatesService, Template } from '../../services/templates.service';
 import { AuthService } from '../../services/auth.service';
 import { BreadcrumbComponent } from '../../components/breadcrumb.component';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-templates',
@@ -32,7 +33,7 @@ export class TemplatesComponent implements OnInit {
 
   loadTemplates() {
     this.loading.set(true);
-    this.http.get<any[]>('/api/templates').subscribe({
+    this.http.get<any[]>(`${environment.apiUrl}/templates`).subscribe({
       next: (data) => {
         const filtered = this.isAdmin() ? data : data.filter(t => t.isActive);
         this.templates.set(filtered);

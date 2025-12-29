@@ -8,6 +8,7 @@ import { BreadcrumbComponent } from '../../components/breadcrumb.component';
 import { TaskDetailModalComponent } from '../../components/task-detail-modal.component';
 import { StageDetailModalComponent } from '../../components/stage-detail-modal.component';
 import { GemUtilsService } from '../../services/gem-utils.service';
+import { environment } from '../../../environments/environment';
 
 interface Subtask {
   id: string;
@@ -762,7 +763,7 @@ export class ProjectDetailComponent implements OnInit {
 
   async loadProject(id: string) {
     try {
-      const data = await this.http.get<Project>(`/api/projects/${id}`).toPromise();
+      const data = await this.http.get<Project>(`${environment.apiUrl}/projects/${id}`).toPromise();
       this.project.set(data || null);
       this.initializeFormData(data);
     } catch (err) {
@@ -834,7 +835,7 @@ export class ProjectDetailComponent implements OnInit {
 
   async saveAllChanges() {
     try {
-      await this.http.patch(`/api/projects/${this.projectId}/details`, {
+      await this.http.patch(`${environment.apiUrl}/projects/${this.projectId}/details`, {
         name: this.formData.name,
         status: this.formData.status,
         price: this.formData.price || null,
@@ -928,7 +929,7 @@ export class ProjectDetailComponent implements OnInit {
   async toggleTask(task: Task) {
     try {
       const newState = !task.completed;
-      await this.http.patch(`/api/projects/${this.projectId}/tasks/${task.id}/toggle`, {}).toPromise();
+      await this.http.patch(`${environment.apiUrl}/projects/${this.projectId}/tasks/${task.id}/toggle`, {}).toPromise();
       task.completed = newState;
       
       // Update progress
@@ -943,7 +944,7 @@ export class ProjectDetailComponent implements OnInit {
   async toggleSubtask(subtask: Subtask) {
     try {
       const newState = !subtask.completed;
-      await this.http.patch(`/api/projects/${this.projectId}/subtasks/${subtask.id}/toggle`, {}).toPromise();
+      await this.http.patch(`${environment.apiUrl}/projects/${this.projectId}/subtasks/${subtask.id}/toggle`, {}).toPromise();
       subtask.completed = newState;
       
       // Recarregar projeto para atualizar status das tasks
@@ -957,7 +958,7 @@ export class ProjectDetailComponent implements OnInit {
 
   async saveSubtaskAnswer(subtask: Subtask) {
     try {
-      await this.http.patch(`/api/projects/${this.projectId}/subtasks/${subtask.id}/answer`, {
+      await this.http.patch(`${environment.apiUrl}/projects/${this.projectId}/subtasks/${subtask.id}/answer`, {
         answer: subtask.answer || ''
       }).toPromise();
       this.toast.success('Resposta salva!');
