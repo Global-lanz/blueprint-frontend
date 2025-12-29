@@ -5,6 +5,7 @@ import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../services/auth.service';
 import { ToastService } from '../../services/toast.service';
 import { BreadcrumbComponent } from '../../components/breadcrumb.component';
+import { environment } from '../../../environments/environment';
 
 interface Subtask {
   id: string;
@@ -240,7 +241,7 @@ export class TemplateDetailComponent implements OnInit {
 
   async loadTemplate(id: string) {
     try {
-      const data = await this.http.get<Template>(`/api/templates/${id}`).toPromise();
+      const data = await this.http.get<Template>(`${environment.apiUrl}/templates/${id}`).toPromise();
       this.template.set(data as Template);
     } catch (err) {
       console.error('Failed to load template:', err);
@@ -272,7 +273,7 @@ export class TemplateDetailComponent implements OnInit {
 
     try {
       const updated = await this.http.patch<Template>(
-        `/api/templates/${this.template()!.id}/toggle-active`,
+        `${environment.apiUrl}/templates/${this.template()!.id}/toggle-active`,
         {}
       ).toPromise();
       

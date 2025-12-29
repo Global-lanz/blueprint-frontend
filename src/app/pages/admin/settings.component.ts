@@ -175,8 +175,12 @@ interface Template {
             <div class="setting-control">
               <div class="info-grid">
                 <div class="info-item">
-                  <span class="info-label">Versão:</span>
-                  <span class="info-value">{{ version }}</span>
+                  <span class="info-label">🎨 Frontend:</span>
+                  <span class="info-value"><code>v{{ version }}</code></span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">⚙️ Backend:</span>
+                  <span class="info-value"><code>v{{ backendVersion() }}</code></span>
                 </div>
                 <div class="info-item">
                   <span class="info-label">API URL:</span>
@@ -401,6 +405,7 @@ export class SettingsComponent implements OnInit {
   licenseDuration = 365;
   environment = environment;
   version = packageInfo.version;
+  backendVersion = signal<string>('...');
   templates: Template[] = [];
   selectedTemplateId: string | null = null;
   webhookToken: string = '';
@@ -416,6 +421,7 @@ export class SettingsComponent implements OnInit {
   ngOnInit() {
     this.loadSettings();
     this.loadTemplates();
+    this.loadBackendVersion();
   }
 
   loadSettings() {
@@ -573,6 +579,17 @@ export class SettingsComponent implements OnInit {
       error: (err) => {
         this.toast.error('Erro ao salvar token do webhook');
         console.error(err);
+      }
+    });
+  }
+
+  loadBackendVersion() {
+    this.http.get<{ version: string }>(`${environment.apiUrl}/version`).subscribe({
+      next: (data) => {
+        this.backendVersion.set(data.version);
+      },
+      error: () => {
+        this.backendVersion.set('N/A');
       }
     });
   }

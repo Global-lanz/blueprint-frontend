@@ -5,6 +5,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { ToastService } from '../../services/toast.service';
 import { ConfirmService } from '../../services/confirm.service';
+import { environment } from '../../../environments/environment';
 
 interface Subtask {
   id?: string;
@@ -204,7 +205,7 @@ export class ProjectManageComponent implements OnInit {
 
   async loadProject(id: string) {
     try {
-      const data = await this.http.get<Project>(`/api/projects/${id}`).toPromise();
+      const data = await this.http.get<Project>(`${environment.apiUrl}/projects/${id}`).toPromise();
       this.project.set(data || null);
     } catch (err) {
       console.error('Failed to load project:', err);
@@ -283,7 +284,7 @@ export class ProjectManageComponent implements OnInit {
 
     this.saving.set(true);
     try {
-      await this.http.put(`/api/projects/${this.projectId}/structure`, {
+      await this.http.put(`${environment.apiUrl}/projects/${this.projectId}/structure`, {
         stages: proj.projectStages
       }).toPromise();
       this.toast.success('Alterações salvas com sucesso!');
