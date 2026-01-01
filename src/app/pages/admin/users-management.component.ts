@@ -105,19 +105,16 @@ interface UserWithStats {
           
           <div class="user-card-body">
             <div class="user-stats-row">
-              @if (user.role === 'CLIENT') {
-                <div class="user-stat-compact">
-                  <span class="stat-icon">📊</span>
-                  <span>{{ user.projectCount }} projetos</span>
-                </div>
-              }
+              <div class="user-stat-compact" *ngIf="user.role === 'CLIENT'">
+                <span class="stat-icon">📊</span>
+                <span>{{ user.projectCount }} projetos</span>
+              </div>
               <div class="user-stat-compact">
                 <span class="stat-icon">🕐</span>
                 <span>{{ formatDate(user.lastLoginAt) || 'Nunca' }}</span>
               </div>
             </div>
-            @if (user.licenseExpiresAt) {
-            <div class="user-stats-row">
+            <div class="user-stats-row" *ngIf="user.licenseExpiresAt">
               <div class="user-stat-compact">
                 <span class="stat-icon">⏰</span>
                 <span [class.text-danger]="isLicenseExpired(user)"
@@ -126,7 +123,6 @@ interface UserWithStats {
                 </span>
               </div>
             </div>
-            }
           </div>
 
           <div class="user-card-footer">
