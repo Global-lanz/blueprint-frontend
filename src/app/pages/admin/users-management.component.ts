@@ -105,7 +105,7 @@ interface UserWithStats {
           
           <div class="user-card-body">
             <div class="user-stats-row">
-              <div class="user-stat-compact">
+              <div class="user-stat-compact" *ngIf="user.role === 'CLIENT'">
                 <span class="stat-icon">📊</span>
                 <span>{{ user.projectCount }} projetos</span>
               </div>
