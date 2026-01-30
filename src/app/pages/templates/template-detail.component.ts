@@ -1,9 +1,10 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../services/auth.service';
 import { ToastService } from '../../services/toast.service';
+import { BreadcrumbService } from '../../services/breadcrumb.service';
 import { BreadcrumbComponent } from '../../components/breadcrumb.component';
 import { environment } from '../../../environments/environment';
 
@@ -222,20 +223,29 @@ interface Template {
     </div>
   `,
 })
-export class TemplateDetailComponent implements OnInit {
+export class TemplateDetailComponent implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private http = inject(HttpClient);
   private authService = inject(AuthService);
   private toast = inject(ToastService);
+  private breadcrumbService = inject(BreadcrumbService);
 
   template = signal<Template | null>(null);
   loading = signal(true);
+  private templateId: string = '';
 
   ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
+      this.templateId = id;
       this.loadTemplate(id);
+    }
+  }
+
+  ngOnDestroy() {
+    if (this.templateId) {
+      this.breadcrumbService.clearDynamicLabel(this.templateId);
     }
   }
 
@@ -243,6 +253,10 @@ export class TemplateDetailComponent implements OnInit {
     try {
       const data = await this.http.get<Template>(`${environment.apiUrl}/templates/${id}`).toPromise();
       this.template.set(data as Template);
+      // Set dynamic breadcrumb label
+      if (data) {
+        this.breadcrumbService.setDynamicLabel(id, data.name);
+      }
     } catch (err) {
       console.error('Failed to load template:', err);
       this.template.set(null);
@@ -267,7 +281,7 @@ export class TemplateDetailComponent implements OnInit {
 
   async toggleActive() {
     if (!this.template()) return;
-    
+
     const action = this.template()!.isActive ? 'desativar' : 'ativar';
     const actionPast = this.template()!.isActive ? 'desativado' : 'ativado';
 
@@ -276,7 +290,7 @@ export class TemplateDetailComponent implements OnInit {
         `${environment.apiUrl}/templates/${this.template()!.id}/toggle-active`,
         {}
       ).toPromise();
-      
+
       this.template.set(updated as Template);
       this.toast.success(`Template ${actionPast} com sucesso!`);
     } catch (err: any) {
@@ -296,7 +310,7 @@ export class TemplateDetailComponent implements OnInit {
   getTotalTasks(): number {
     const tpl = this.template();
     if (!tpl) return 0;
-    
+
     const tasksInStages = tpl.stages.reduce((sum, stage) => sum + stage.tasks.length, 0);
     return tasksInStages + tpl.tasks.length;
   }
@@ -304,21 +318,21 @@ export class TemplateDetailComponent implements OnInit {
   getTotalSubtasks(): number {
     const tpl = this.template();
     if (!tpl) return 0;
-    
+
     let count = 0;
-    
+
     // Count subtasks in stages
     for (const stage of tpl.stages) {
       for (const task of stage.tasks) {
         count += task.subtasks.length;
       }
     }
-    
+
     // Count subtasks in tasks without stages
     for (const task of tpl.tasks) {
       count += task.subtasks.length;
     }
-    
+
     return count;
   }
 }
