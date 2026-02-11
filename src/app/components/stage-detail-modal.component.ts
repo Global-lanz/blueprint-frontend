@@ -50,7 +50,7 @@ interface Stage {
               <h3 class="modal-title">{{ stage?.name }}</h3>
             </div>
             <div class="stage-meta">
-              <span class="stage-badge">Etapa {{ stage?.order }}</span>
+              <!-- Badge removed -->
             </div>
           </div>
           <button class="modal-close" (click)="close()" title="Fechar">

@@ -563,11 +563,9 @@ interface Project {
                 >
                   <div class="stage-button-header">
                     <span class="stage-gem-icon" *ngIf="stage.gemType" [innerHTML]="getGemIcon(stage.gemType)"></span>
-                    <h4 class="stage-button-title">{{ stage.name }}</h4>
-                  </div>
-                  <div class="stage-button-meta">
-                    <span class="stage-button-badge">Etapa {{ stage.order }}</span>
-                  </div>
+                    <h3 class="bp-card-title" style="margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+                  {{ stage.name }}
+                </h3>  </div>
                   <div class="stage-button-stats">
                     <span class="stage-stat">
                       📝 {{ stage.tasks.length }} tarefa{{ stage.tasks.length !== 1 ? 's' : '' }}

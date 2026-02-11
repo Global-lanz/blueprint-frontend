@@ -136,9 +136,7 @@ interface ProjectItem {
                     (click)="openTaskModal(task)"
                   >
                     <h5 class="kanban-task-title">{{ task.title }}</h5>
-                    <div class="kanban-task-description" *ngIf="task.description">
-                      <app-html-renderer [content]="task.description"></app-html-renderer>
-                    </div>
+
                     <div class="kanban-task-footer">
                       <span class="bp-badge bp-text-sm" [style.background-color]="getProjectColor(task.projectId)" style="color: white;">{{ task.projectName }}</span>
                       <span class="bp-badge bp-badge-success bp-text-sm" *ngIf="task.stageName">
@@ -163,9 +161,7 @@ interface ProjectItem {
                     (click)="openTaskModal(task)"
                   >
                     <h5 class="kanban-task-title">{{ task.title }}</h5>
-                    <div class="kanban-task-description" *ngIf="task.description">
-                      <app-html-renderer [content]="task.description"></app-html-renderer>
-                    </div>
+
                     <div class="kanban-task-footer">
                       <span class="bp-badge bp-text-sm" [style.background-color]="getProjectColor(task.projectId)" style="color: white;">{{ task.projectName }}</span>
                       <span class="bp-badge bp-badge-secondary bp-text-sm" *ngIf="task.stageName">
@@ -190,9 +186,7 @@ interface ProjectItem {
                     (click)="openTaskModal(task)"
                   >
                     <h5 class="kanban-task-title">{{ task.title }}</h5>
-                    <div class="kanban-task-description" *ngIf="task.description">
-                      <app-html-renderer [content]="task.description"></app-html-renderer>
-                    </div>
+
                     <div class="kanban-task-footer">
                       <span class="bp-badge bp-text-sm" [style.background-color]="getProjectColor(task.projectId)" style="color: white;">{{ task.projectName }}</span>
                       <span class="bp-badge bp-badge-secondary bp-text-sm" *ngIf="task.stageName">
