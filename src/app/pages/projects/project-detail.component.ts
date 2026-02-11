@@ -563,9 +563,9 @@ interface Project {
                 >
                   <div class="stage-button-header">
                     <span class="stage-gem-icon" *ngIf="stage.gemType" [innerHTML]="getGemIcon(stage.gemType)"></span>
-                    <h3 class="bp-card-title" style="margin: 0; display: flex; align-items: center; gap: 0.5rem;">
-                  {{ stage.name }}
-                </h3>  </div>
+                    <h4 class="stage-button-title" style="margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+                      {{ stage.name }}
+                    </h4>  </div>
                   <div class="stage-button-stats">
                     <span class="stage-stat">
                       📝 {{ stage.tasks.length }} tarefa{{ stage.tasks.length !== 1 ? 's' : '' }}
@@ -605,7 +605,7 @@ interface Project {
                       (click)="openTaskModal(task)"
                     >
                       <h5 class="kanban-task-title">{{ task.title }}</h5>
-                      <p class="kanban-task-description" *ngIf="task.description">{{ task.description }}</p>
+
                       <div class="kanban-task-footer">
                         <span class="bp-badge bp-badge-secondary bp-text-sm" *ngIf="task.stageName">
                           <span *ngIf="task.stageGemType" [innerHTML]="getGemIcon(task.stageGemType)" style="display: inline-block; vertical-align: middle; margin-right: 4px;"></span>
@@ -635,7 +635,7 @@ interface Project {
                       (click)="openTaskModal(task)"
                     >
                       <h5 class="kanban-task-title">{{ task.title }}</h5>
-                      <p class="kanban-task-description" *ngIf="task.description">{{ task.description }}</p>
+
                       <div class="kanban-task-footer">
                         <span class="bp-badge bp-badge-secondary bp-text-sm" *ngIf="task.stageName">
                           <span *ngIf="task.stageGemType" [innerHTML]="getGemIcon(task.stageGemType)" style="display: inline-block; vertical-align: middle; margin-right: 4px;"></span>
@@ -665,7 +665,7 @@ interface Project {
                       (click)="openTaskModal(task)"
                     >
                       <h5 class="kanban-task-title">{{ task.title }}</h5>
-                      <p class="kanban-task-description" *ngIf="task.description">{{ task.description }}</p>
+
                       <div class="kanban-task-footer">
                         <span class="bp-badge bp-badge-secondary bp-text-sm" *ngIf="task.stageName">
                           <span *ngIf="task.stageGemType" [innerHTML]="getGemIcon(task.stageGemType)" style="display: inline-block; vertical-align: middle; margin-right: 4px;"></span>
