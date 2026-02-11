@@ -158,12 +158,13 @@
                             </button>
                           </div>
 
-                          <div *ngFor="let subtask of task.subtasks; let sti = index"
-                            class="bp-flex bp-gap-sm bp-mb-sm">
-                            <input type="text" class="bp-input" [(ngModel)]="subtask.description"
+                          <div *ngFor="let subtask of task.subtasks; let sti = index" class="bp-mb-md"
+                            style="position: relative; background: #fff; padding: 0.5rem; border-radius: 6px; border: 1px solid #eee;">
+                            <app-rich-text-editor [(ngModel)]="subtask.description"
                               [name]="'stage-' + si + '-task-' + ti + '-subtask-' + sti"
-                              placeholder="Descrição da subtarefa..." />
+                              placeholder="Descrição da subtarefa..."></app-rich-text-editor>
                             <button type="button" class="bp-btn bp-btn-sm bp-btn-error"
+                              style="position: absolute; top: -0.5rem; right: -0.5rem; border-radius: 50%; width: 24px; height: 24px; padding: 0; display: flex; align-items: center; justify-content: center; shadow: 0 2px 4px rgba(0,0,0,0.1);"
                               (click)="removeSubtaskFromStageTask(si, ti, sti)">
                               ✕
                             </button>

@@ -6,12 +6,14 @@ import { Router } from '@angular/router';
 import { TemplatesService, Template } from '../../services/templates.service';
 import { AuthService } from '../../services/auth.service';
 import { BreadcrumbComponent } from '../../components/breadcrumb.component';
+import { HtmlRendererComponent } from '../../components/html-renderer.component';
 import { environment } from '../../../environments/environment';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-templates',
   standalone: true,
-  imports: [CommonModule, RouterModule, BreadcrumbComponent],
+  imports: [CommonModule, RouterModule, FormsModule, BreadcrumbComponent, HtmlRendererComponent],
   templateUrl: './templates.component.html',
 })
 export class TemplatesComponent implements OnInit {

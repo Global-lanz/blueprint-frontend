@@ -8,6 +8,7 @@ import { BreadcrumbComponent } from '../../components/breadcrumb.component';
 import { TaskDetailModalComponent } from '../../components/task-detail-modal.component';
 import { StageDetailModalComponent } from '../../components/stage-detail-modal.component';
 import { GemUtilsService } from '../../services/gem-utils.service';
+import { HtmlRendererComponent } from '../../components/html-renderer.component';
 import { environment } from '../../../environments/environment';
 
 interface Subtask {
@@ -64,7 +65,7 @@ interface Project {
 @Component({
   selector: 'app-project-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule, BreadcrumbComponent, TaskDetailModalComponent, StageDetailModalComponent],
+  imports: [CommonModule, FormsModule, BreadcrumbComponent, TaskDetailModalComponent, StageDetailModalComponent, HtmlRendererComponent],
   styles: [`
     .details-grid {
       display: grid;
@@ -387,6 +388,9 @@ interface Project {
                   />
                 </h1>
               </div>
+              <div class="description-content">
+              <app-html-renderer [content]="project()?.template?.description || ''"></app-html-renderer>
+            </div>
               <p class="bp-text-muted">
                 Baseado em: {{ project()!.template.name }}
               </p>
@@ -719,7 +723,7 @@ export class ProjectDetailComponent implements OnInit {
   selectedStage = signal<Stage | null>(null);
   isTaskModalOpen = signal(false);
   isStageModalOpen = signal(false);
-  
+
   // Editing state
   editingName = false;
   editingPrice = false;
@@ -727,7 +731,7 @@ export class ProjectDetailComponent implements OnInit {
   editingLinks = false;
   hasUnsavedChanges = false;
   showAddLinkForm = false;
-  
+
   // Form data
   formData = {
     name: '',
@@ -737,7 +741,7 @@ export class ProjectDetailComponent implements OnInit {
     saleStartDate: '',
     links: {} as { [key: string]: string }
   };
-  
+
   newLinkName = '';
   newLinkUrl = '';
 
@@ -791,7 +795,7 @@ export class ProjectDetailComponent implements OnInit {
     if (field === 'name') this.editingName = true;
     if (field === 'price') this.editingPrice = true;
     if (field === 'saleDate') this.editingSaleDate = true;
-    
+
     setTimeout(() => {
       if (field === 'price') {
         const priceInput = document.querySelector('input[placeholder="0.00"]') as HTMLInputElement;
@@ -813,7 +817,7 @@ export class ProjectDetailComponent implements OnInit {
     // Restaurar valor original
     const project = this.project();
     if (!project) return;
-    
+
     if (field === 'name') {
       this.formData.name = project.name;
       this.editingName = false;
@@ -931,7 +935,7 @@ export class ProjectDetailComponent implements OnInit {
       const newState = !task.completed;
       await this.http.patch(`${environment.apiUrl}/projects/${this.projectId}/tasks/${task.id}/toggle`, {}).toPromise();
       task.completed = newState;
-      
+
       // Update progress
       this.updateProgress();
       this.toast.success(newState ? 'Tarefa concluída!' : 'Tarefa reaberta');
@@ -946,7 +950,7 @@ export class ProjectDetailComponent implements OnInit {
       const newState = !subtask.completed;
       await this.http.patch(`${environment.apiUrl}/projects/${this.projectId}/subtasks/${subtask.id}/toggle`, {}).toPromise();
       subtask.completed = newState;
-      
+
       // Recarregar projeto para atualizar status das tasks
       await this.loadProject(this.projectId);
       this.toast.success(newState ? 'Subtarefa concluída!' : 'Subtarefa reaberta');
@@ -976,11 +980,11 @@ export class ProjectDetailComponent implements OnInit {
 
   getStageProgress(stage: Stage): number {
     if (!stage.tasks || stage.tasks.length === 0) return 0;
-    
+
     // Contar todas as subtarefas da stage
     const allSubtasks = stage.tasks.flatMap(t => t.subtasks || []);
     if (allSubtasks.length === 0) return 0;
-    
+
     const completed = allSubtasks.filter(s => s.completed).length;
     return Math.round((completed / allSubtasks.length) * 100);
   }
