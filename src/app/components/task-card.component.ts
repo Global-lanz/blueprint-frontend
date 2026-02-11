@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { ToastService } from '../services/toast.service';
 import { environment } from '../../environments/environment';
+import { HtmlRendererComponent } from './html-renderer.component';
 
 interface Subtask {
   id: string;
@@ -27,7 +28,7 @@ interface Task {
 @Component({
   selector: 'app-task-card',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, HtmlRendererComponent],
   template: `
     <div class="task-card">
       <div class="task-header" *ngIf="showHeader">
@@ -40,9 +41,9 @@ interface Task {
         </span>
       </div>
 
-      <p class="task-description" *ngIf="task.description">
-        {{ task.description }}
-      </p>
+      <div class="task-description" *ngIf="task.description">
+        <app-html-renderer [content]="task.description"></app-html-renderer>
+      </div>
 
       <!-- Task Link -->
       <div class="task-link-section" style="margin-bottom: 1rem;">
@@ -80,8 +81,8 @@ interface Task {
                 (change)="onToggleSubtask(subtask)"
                 class="checkbox-input"
               />
-              <span [class.completed]="subtask.completed">
-                {{ subtask.description }}
+              <span [class.completed]="subtask.completed" style="flex: 1; min-width: 0;">
+                <app-html-renderer [content]="subtask.description"></app-html-renderer>
               </span>
             </label>
           </div>

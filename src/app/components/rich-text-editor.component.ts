@@ -3,17 +3,17 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 
 @Component({
-    selector: 'app-rich-text-editor',
-    standalone: true,
-    imports: [CommonModule],
-    providers: [
-        {
-            provide: NG_VALUE_ACCESSOR,
-            useExisting: forwardRef(() => RichTextEditorComponent),
-            multi: true
-        }
-    ],
-    template: `
+  selector: 'app-rich-text-editor',
+  standalone: true,
+  imports: [CommonModule],
+  providers: [
+    {
+      provide: NG_VALUE_ACCESSOR,
+      useExisting: forwardRef(() => RichTextEditorComponent),
+      multi: true
+    }
+  ],
+  template: `
     <div class="rich-editor-container">
       <div class="rich-editor-toolbar">
         <button 
@@ -72,7 +72,7 @@ import { CommonModule } from '@angular/common';
       ></div>
     </div>
   `,
-    styles: [`
+  styles: [`
     .rich-editor-container {
       border: 1px solid #d1d5db;
       border-radius: 6px;
@@ -157,66 +157,71 @@ import { CommonModule } from '@angular/common';
   `]
 })
 export class RichTextEditorComponent implements ControlValueAccessor {
-    @Input() placeholder = 'Digite aqui...';
-    @ViewChild('editor', { static: false }) editorElement!: ElementRef<HTMLDivElement>;
+  @Input() placeholder = 'Digite aqui...';
+  @ViewChild('editor', { static: false }) editorElement!: ElementRef<HTMLDivElement>;
 
-    private onChange: (value: string) => void = () => { };
-    onTouched: () => void = () => { };
+  private onChange: (value: string) => void = () => { };
+  onTouched: () => void = () => { };
 
-    writeValue(value: string): void {
-        if (this.editorElement) {
-            this.editorElement.nativeElement.innerHTML = value || '';
+  writeValue(value: string): void {
+    if (this.editorElement) {
+      this.editorElement.nativeElement.innerHTML = value || '';
+    }
+  }
+
+  registerOnChange(fn: (value: string) => void): void {
+    this.onChange = fn;
+  }
+
+  registerOnTouched(fn: () => void): void {
+    this.onTouched = fn;
+  }
+
+  execCommand(command: string): void {
+    document.execCommand(command, false);
+    this.editorElement.nativeElement.focus();
+    this.onContentChange();
+  }
+
+  isCommandActive(command: string): boolean {
+    return document.queryCommandState(command);
+  }
+
+  insertLink(): void {
+    let url = prompt('Digite a URL:');
+    if (url) {
+      // Auto-prepend https:// if protocol is missing
+      if (!url.match(/^(https?:\/\/|mailto:|tel:|\/)/)) {
+        url = 'https://' + url;
+      }
+
+      const selection = window.getSelection();
+      if (selection && selection.rangeCount > 0) {
+        const range = selection.getRangeAt(0);
+        const selectedText = range.toString();
+
+        if (selectedText) {
+          document.execCommand('createLink', false, url);
+        } else {
+          const link = document.createElement('a');
+          link.href = url;
+          link.textContent = url;
+          link.target = '_blank';
+          range.insertNode(link);
         }
-    }
-
-    registerOnChange(fn: (value: string) => void): void {
-        this.onChange = fn;
-    }
-
-    registerOnTouched(fn: () => void): void {
-        this.onTouched = fn;
-    }
-
-    execCommand(command: string): void {
-        document.execCommand(command, false);
-        this.editorElement.nativeElement.focus();
         this.onContentChange();
+      }
     }
+  }
 
-    isCommandActive(command: string): boolean {
-        return document.queryCommandState(command);
-    }
+  onContentChange(): void {
+    const html = this.editorElement.nativeElement.innerHTML;
+    this.onChange(html);
+  }
 
-    insertLink(): void {
-        const url = prompt('Digite a URL:');
-        if (url) {
-            const selection = window.getSelection();
-            if (selection && selection.rangeCount > 0) {
-                const range = selection.getRangeAt(0);
-                const selectedText = range.toString();
-
-                if (selectedText) {
-                    document.execCommand('createLink', false, url);
-                } else {
-                    const link = document.createElement('a');
-                    link.href = url;
-                    link.textContent = url;
-                    link.target = '_blank';
-                    range.insertNode(link);
-                }
-                this.onContentChange();
-            }
-        }
-    }
-
-    onContentChange(): void {
-        const html = this.editorElement.nativeElement.innerHTML;
-        this.onChange(html);
-    }
-
-    onPaste(event: ClipboardEvent): void {
-        event.preventDefault();
-        const text = event.clipboardData?.getData('text/plain') || '';
-        document.execCommand('insertText', false, text);
-    }
+  onPaste(event: ClipboardEvent): void {
+    event.preventDefault();
+    const text = event.clipboardData?.getData('text/plain') || '';
+    document.execCommand('insertText', false, text);
+  }
 }
