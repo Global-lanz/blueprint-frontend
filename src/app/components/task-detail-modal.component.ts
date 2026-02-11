@@ -6,6 +6,7 @@ import { ToastService } from '../services/toast.service';
 import { GemAchievementModalComponent } from './gem-achievement-modal.component';
 import { GemUtilsService } from '../services/gem-utils.service';
 import { HtmlRendererComponent } from './html-renderer.component';
+import { RichTextEditorComponent } from './rich-text-editor.component';
 import { environment } from '../../environments/environment';
 
 interface Subtask {
@@ -32,7 +33,8 @@ interface Task {
 @Component({
   selector: 'app-task-detail-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule, GemAchievementModalComponent, HtmlRendererComponent],
+
+  imports: [CommonModule, FormsModule, GemAchievementModalComponent, HtmlRendererComponent, RichTextEditorComponent],
   template: `
     <div class="modal-overlay" *ngIf="isOpen" (click)="close()">
       <div class="modal-content" (click)="$event.stopPropagation()">
@@ -50,8 +52,30 @@ interface Task {
         </div>
 
         <div class="modal-body">
-          <div *ngIf="task?.description" class="task-description">
-            <app-html-renderer [content]="task.description"></app-html-renderer>
+          <!-- Description Section -->
+          <div class="task-description-section" style="margin-bottom: 1.5rem;">
+            <div *ngIf="!isEditingDescription" class="description-view">
+              <div *ngIf="task?.description" class="task-description">
+                <app-html-renderer [content]="task.description"></app-html-renderer>
+              </div>
+              <div *ngIf="!task?.description" class="no-description bp-text-muted">
+                Sem descrição.
+              </div>
+              <button class="bp-btn bp-btn-sm bp-btn-secondary bp-mt-sm" (click)="startEditingDescription()">
+                ✏️ Editar Descrição
+              </button>
+            </div>
+
+            <div *ngIf="isEditingDescription" class="description-edit">
+              <app-rich-text-editor 
+                [(ngModel)]="tempDescription" 
+                placeholder="Descreva a tarefa..."
+              ></app-rich-text-editor>
+              <div class="edit-actions bp-mt-sm" style="display: flex; gap: 0.5rem;">
+                <button class="bp-btn bp-btn-primary bp-btn-sm" (click)="saveDescription()">💾 Salvar</button>
+                <button class="bp-btn bp-btn-secondary bp-btn-sm" (click)="cancelEditingDescription()">✖ Cancelar</button>
+              </div>
+            </div>
           </div>
 
           <!-- Task Link -->
@@ -383,7 +407,11 @@ export class TaskDetailModalComponent {
   showTaskLinkForm = false;
   tempTaskLink = '';
   tempSubtaskLinks: { [key: string]: string } = {};
+
   editingSubtaskLinks: Set<string> = new Set();
+
+  isEditingDescription = false;
+  tempDescription = '';
 
   constructor(
     private http: HttpClient,
@@ -500,6 +528,53 @@ export class TaskDetailModalComponent {
     } catch (err) {
       console.error('Failed to remove task link:', err);
       this.toast.error('Erro ao remover link');
+    }
+  }
+
+
+  // Description Methods
+  startEditingDescription() {
+    this.tempDescription = this.task?.description || '';
+    this.isEditingDescription = true;
+  }
+
+  cancelEditingDescription() {
+    this.isEditingDescription = false;
+    this.tempDescription = '';
+  }
+
+  async saveDescription() {
+    if (!this.projectId || !this.task?.id) return;
+
+    try {
+      await this.http.patch(`${environment.apiUrl}/projects/${this.projectId}/tasks/${this.task.id}/description`, {
+        description: this.tempDescription
+      }).toPromise();
+
+      if (this.task) {
+        this.task.description = this.tempDescription;
+      }
+      this.isEditingDescription = false;
+      this.toast.success('Descrição atualizada!');
+      this.taskUpdated.emit();
+    } catch (err) {
+      console.error('Failed to save description:', err);
+      // Fallback: try updating the task itself if specific endpoint doesn't exist
+      try {
+        await this.http.patch(`${environment.apiUrl}/projects/${this.projectId}/tasks/${this.task.id}`, {
+          description: this.tempDescription
+        }).toPromise();
+
+        if (this.task) {
+          this.task.description = this.tempDescription;
+        }
+        this.isEditingDescription = false;
+        this.toast.success('Descrição atualizada!');
+        this.taskUpdated.emit();
+      } catch (err2) {
+        console.error('Failed to update task:', err2);
+        this.toast.error('Erro ao atualizar descrição');
+      }
     }
   }
 
