@@ -5,6 +5,7 @@ import { HttpClient } from '@angular/common/http';
 import { ToastService } from '../services/toast.service';
 import { GemAchievementModalComponent } from './gem-achievement-modal.component';
 import { GemUtilsService } from '../services/gem-utils.service';
+import { HtmlRendererComponent } from './html-renderer.component';
 import { environment } from '../../environments/environment';
 
 interface Subtask {
@@ -31,7 +32,7 @@ interface Task {
 @Component({
   selector: 'app-task-detail-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule, GemAchievementModalComponent],
+  imports: [CommonModule, FormsModule, GemAchievementModalComponent, HtmlRendererComponent],
   template: `
     <div class="modal-overlay" *ngIf="isOpen" (click)="close()">
       <div class="modal-content" (click)="$event.stopPropagation()">
@@ -50,7 +51,7 @@ interface Task {
 
         <div class="modal-body">
           <div *ngIf="task?.description" class="task-description">
-            <p>{{ task.description }}</p>
+            <app-html-renderer [content]="task.description"></app-html-renderer>
           </div>
 
           <!-- Task Link -->
@@ -387,7 +388,7 @@ export class TaskDetailModalComponent {
   constructor(
     private http: HttpClient,
     private toast: ToastService
-  ) {}
+  ) { }
 
   private gemUtils = inject(GemUtilsService);
 
@@ -417,13 +418,13 @@ export class TaskDetailModalComponent {
       const response: any = await this.http.patch(`${environment.apiUrl}/projects/${this.projectId}/subtasks/${subtask.id}/toggle`, {}).toPromise();
       subtask.completed = !subtask.completed;
       this.toast.success(subtask.completed ? 'Subtarefa concluída!' : 'Subtarefa reaberta');
-      
+
       // Verificar se houve mudança de insígnia
       if (response?.gemChange?.changed && response.gemChange.newGem) {
         this.newGemType = response.gemChange.newGem;
         this.showGemModal = true;
       }
-      
+
       this.taskUpdated.emit();
     } catch (err) {
       console.error('Failed to toggle subtask:', err);
@@ -464,7 +465,7 @@ export class TaskDetailModalComponent {
       await this.http.patch(`/api/projects/${this.projectId}/tasks/${this.task.id}/link`, {
         link: this.tempTaskLink
       }).toPromise();
-      
+
       if (this.task) {
         this.task.link = this.tempTaskLink;
       }
@@ -490,7 +491,7 @@ export class TaskDetailModalComponent {
       await this.http.patch(`${environment.apiUrl}/projects/${this.projectId}/tasks/${this.task.id}/link`, {
         link: null
       }).toPromise();
-      
+
       if (this.task) {
         this.task.link = undefined;
       }
@@ -534,7 +535,7 @@ export class TaskDetailModalComponent {
       await this.http.patch(`/api/projects/${this.projectId}/subtasks/${subtask.id}/link`, {
         link: link
       }).toPromise();
-      
+
       subtask.link = link;
       delete this.tempSubtaskLinks[subtask.id];
       this.editingSubtaskLinks.delete(subtask.id);
@@ -553,7 +554,7 @@ export class TaskDetailModalComponent {
       await this.http.patch(`${environment.apiUrl}/projects/${this.projectId}/subtasks/${subtask.id}/link`, {
         link: null
       }).toPromise();
-      
+
       subtask.link = undefined;
       this.toast.success('Link removido');
       this.taskUpdated.emit();

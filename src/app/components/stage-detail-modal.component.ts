@@ -6,6 +6,7 @@ import { ToastService } from '../services/toast.service';
 import { GemAchievementModalComponent } from './gem-achievement-modal.component';
 import { GemUtilsService } from '../services/gem-utils.service';
 import { TaskCardComponent } from './task-card.component';
+import { HtmlRendererComponent } from './html-renderer.component';
 import { environment } from '../../environments/environment';
 
 interface Subtask {
@@ -38,7 +39,7 @@ interface Stage {
 @Component({
   selector: 'app-stage-detail-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule, GemAchievementModalComponent, TaskCardComponent],
+  imports: [CommonModule, FormsModule, GemAchievementModalComponent, TaskCardComponent, HtmlRendererComponent],
   template: `
     <div class="modal-overlay" *ngIf="isOpen" (click)="close()">
       <div class="modal-content" (click)="$event.stopPropagation()">
@@ -60,7 +61,7 @@ interface Stage {
         <div class="modal-body">
           <!-- Stage Description -->
           <div class="stage-description" *ngIf="stage?.description">
-            <p>{{ stage.description }}</p>
+            <app-html-renderer [content]="stage.description"></app-html-renderer>
           </div>
 
           <!-- Progress Overview -->
@@ -498,7 +499,7 @@ export class StageDetailModalComponent {
   constructor(
     private http: HttpClient,
     private toast: ToastService
-  ) {}
+  ) { }
 
   private gemUtils = inject(GemUtilsService);
 
@@ -539,18 +540,18 @@ export class StageDetailModalComponent {
     try {
       const response: any = await this.http.patch(`${environment.apiUrl}/projects/${this.projectId}/subtasks/${subtask.id}/toggle`, {}).toPromise();
       subtask.completed = !subtask.completed;
-      
+
       // Recalcular se a tarefa está completa
       this.updateTaskCompletion();
-      
+
       this.toast.success(subtask.completed ? 'Subtarefa concluída!' : 'Subtarefa reaberta');
-      
+
       // Verificar se houve mudança de insígnia
       if (response?.gemChange?.changed && response.gemChange.newGem) {
         this.newGemType = response.gemChange.newGem;
         this.showGemModal = true;
       }
-      
+
       this.stageUpdated.emit();
     } catch (err) {
       console.error('Failed to toggle subtask:', err);
@@ -560,7 +561,7 @@ export class StageDetailModalComponent {
 
   updateTaskCompletion() {
     if (!this.stage?.tasks) return;
-    
+
     // Atualizar o status de conclusão de cada tarefa baseado nas subtarefas
     this.stage.tasks.forEach(task => {
       if (task.subtasks && task.subtasks.length > 0) {
@@ -575,7 +576,7 @@ export class StageDetailModalComponent {
 
     try {
       const promises: Promise<any>[] = [];
-      
+
       // Coletar todas as subtarefas de todas as tarefas
       for (const task of this.stage.tasks) {
         for (const subtask of task.subtasks || []) {

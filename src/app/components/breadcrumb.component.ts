@@ -1,7 +1,8 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, NavigationEnd, ActivatedRoute, RouterModule } from '@angular/router';
 import { filter, distinctUntilChanged } from 'rxjs/operators';
+import { BreadcrumbService } from '../services/breadcrumb.service';
 
 interface Breadcrumb {
   label: string;
@@ -23,7 +24,7 @@ interface Breadcrumb {
           class="breadcrumb-item"
           [class.active]="last"
         >
-          <span class="breadcrumb-separator">/</span>
+          <span class="breadcrumb-separator">›</span>
           <a 
             *ngIf="!last" 
             [routerLink]="breadcrumb.url" 
@@ -63,8 +64,10 @@ interface Breadcrumb {
     }
 
     .breadcrumb-separator {
-      color: #6b7280;
+      color: #9ca3af;
       user-select: none;
+      font-size: 1.1rem;
+      font-weight: 400;
     }
 
     .breadcrumb-link {
@@ -90,6 +93,7 @@ interface Breadcrumb {
 })
 export class BreadcrumbComponent implements OnInit {
   breadcrumbs = signal<Breadcrumb[]>([]);
+  private breadcrumbService = inject(BreadcrumbService);
 
   // Mapeamento de rotas para labels legíveis
   private routeLabels: { [key: string]: string } = {
@@ -108,7 +112,7 @@ export class BreadcrumbComponent implements OnInit {
   constructor(
     private router: Router,
     private activatedRoute: ActivatedRoute
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.router.events
@@ -137,15 +141,15 @@ export class BreadcrumbComponent implements OnInit {
 
     for (const child of children) {
       const routeSegments = child.snapshot.url.map(segment => segment.path);
-      
+
       // Process each segment separately
       for (const segment of routeSegments) {
         if (segment !== '') {
           url += `/${segment}`;
-          
+
           // Get label from route data or use default mapping
           const label = child.snapshot.data['breadcrumb'] || this.getLabel(segment);
-          
+
           // Only add if we have a label (IDs return empty string)
           if (label) {
             breadcrumbs.push({
@@ -163,6 +167,12 @@ export class BreadcrumbComponent implements OnInit {
   }
 
   private getLabel(segment: string): string {
+    // Check for dynamic label first (e.g., template name, project name)
+    const dynamicLabel = this.breadcrumbService.getDynamicLabel(segment);
+    if (dynamicLabel) {
+      return dynamicLabel;
+    }
+
     // Check if it's a known route
     if (this.routeLabels[segment]) {
       return this.routeLabels[segment];

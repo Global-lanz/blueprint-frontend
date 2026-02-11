@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { ToastService } from '../../services/toast.service';
+import { BreadcrumbComponent } from '../../components/breadcrumb.component';
 import packageInfo from '../../../../package.json';
 
 interface Setting {
@@ -23,9 +24,10 @@ interface Template {
 @Component({
   selector: 'app-settings',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, BreadcrumbComponent],
   template: `
     <div class="bp-container bp-py-lg">
+      <app-breadcrumb></app-breadcrumb>
       <h1 class="bp-heading-lg bp-mb-lg">⚙️ Configurações do Sistema</h1>
 
       <div class="bp-card">
@@ -416,7 +418,7 @@ export class SettingsComponent implements OnInit {
   constructor(
     private http: HttpClient,
     private toast: ToastService
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.loadSettings();
@@ -495,7 +497,7 @@ export class SettingsComponent implements OnInit {
 
   saveDefaultTemplate() {
     const value = this.selectedTemplateId || '';
-    
+
     this.http.put(`${environment.apiUrl}/users/admin/settings/default_template_id`, {
       value: value,
       description: 'Template padrão para novos usuários via Hotmart'
@@ -518,7 +520,7 @@ export class SettingsComponent implements OnInit {
     // Generate a random secure token (64 characters)
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     let token = '';
-    
+
     // Try using crypto API first
     try {
       const array = new Uint8Array(32);
@@ -533,7 +535,7 @@ export class SettingsComponent implements OnInit {
         token += characters.charAt(Math.floor(Math.random() * characters.length));
       }
     }
-    
+
     this.generatedToken = token;
     this.showGeneratedToken = true;
     this.tokenCopied = false;
@@ -544,7 +546,7 @@ export class SettingsComponent implements OnInit {
     navigator.clipboard.writeText(this.generatedToken).then(() => {
       this.tokenCopied = true;
       this.toast.success('Token copiado para a área de transferência!');
-      
+
       // Reset copied state after 3 seconds
       setTimeout(() => {
         this.tokenCopied = false;
