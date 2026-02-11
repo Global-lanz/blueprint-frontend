@@ -22,6 +22,7 @@ export class TemplatesComponent implements OnInit {
 
   templates = signal<any[]>([]);
   loading = signal(true);
+  showInactive = signal(false); // Filtro padrão: apenas ativos
 
   ngOnInit() {
     this.loadTemplates();
@@ -33,16 +34,40 @@ export class TemplatesComponent implements OnInit {
 
   loadTemplates() {
     this.loading.set(true);
-    this.http.get<any[]>(`${environment.apiUrl}/templates`).subscribe({
+    const includeInactive = this.isAdmin() && this.showInactive();
+    const url = `${environment.apiUrl}/templates${includeInactive ? '?includeInactive=true' : ''}`;
+
+    this.http.get<any[]>(url).subscribe({
       next: (data) => {
-        const filtered = this.isAdmin() ? data : data.filter(t => t.isActive);
-        this.templates.set(filtered);
+        this.templates.set(data);
         this.loading.set(false);
       },
       error: (err) => {
         console.error('Failed to load templates:', err);
         this.loading.set(false);
       },
+    });
+  }
+
+  toggleFilter() {
+    this.showInactive.set(!this.showInactive());
+    this.loadTemplates();
+  }
+
+  clearFilters() {
+    this.showInactive.set(false);
+    this.loadTemplates();
+  }
+
+  toggleTemplateActive(template: any, event: Event) {
+    event.stopPropagation();
+    this.http.patch(`${environment.apiUrl}/templates/${template.id}/toggle-active`, {}).subscribe({
+      next: () => {
+        this.loadTemplates();
+      },
+      error: (err) => {
+        console.error('Failed to toggle template status:', err);
+      }
     });
   }
 
