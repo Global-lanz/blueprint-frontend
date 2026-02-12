@@ -382,27 +382,31 @@ export class ProjectManageComponent implements OnInit {
     const initialStages = this.initialProjectStructure.projectStages;
     const currentStages = this.project()!.projectStages;
 
-    const removedStageNames: string[] = [];
-    const removedTaskTitles: string[] = [];
-    const removedSubtaskDescs: string[] = [];
+    const removalLines: string[] = [];
 
-    // Check for removed stages
+    // Check for removals
     for (const iStage of initialStages) {
       const currentStage = currentStages.find(s => s.id === iStage.id);
+
       if (!currentStage && iStage.id) {
-        removedStageNames.push(`Etapa: ${iStage.name}`);
+        // Stage was removed entirely
+        removalLines.push(`• Etapa: ${iStage.name}`);
       } else if (currentStage) {
-        // Check for removed tasks in this stage
+        // Stage exists, check for removed tasks within it
         for (const iTask of iStage.tasks) {
           const currentTask = currentStage.tasks.find(t => t.id === iTask.id);
+
           if (!currentTask && iTask.id) {
-            removedTaskTitles.push(`Tarefa: ${iTask.title} (da etapa ${iStage.name})`);
+            // Task was removed from an existing stage
+            removalLines.push(`• Etapa: ${iStage.name} ➔ Tarefa: ${iTask.title}`);
           } else if (currentTask) {
-            // Check for removed subtasks in this task
+            // Task exists, check for removed subtasks within it
             for (const iSub of iTask.subtasks) {
               const currentSub = currentTask.subtasks.find(s => s.id === iSub.id);
+
               if (!currentSub && iSub.id) {
-                removedSubtaskDescs.push(`Subtarefa: ${iSub.description} (da tarefa ${iTask.title})`);
+                // Subtask was removed from an existing task
+                removalLines.push(`• Etapa: ${iStage.name} ➔ Tarefa: ${iTask.title} ➔ Subtarefa: ${iSub.description}`);
               }
             }
           }
@@ -410,12 +414,7 @@ export class ProjectManageComponent implements OnInit {
       }
     }
 
-    let summary = '';
-    if (removedStageNames.length > 0) summary += '• ' + removedStageNames.join('\n• ') + '\n';
-    if (removedTaskTitles.length > 0) summary += '• ' + removedTaskTitles.join('\n• ') + '\n';
-    if (removedSubtaskDescs.length > 0) summary += '• ' + removedSubtaskDescs.join('\n• ') + '\n';
-
-    return summary.trim();
+    return removalLines.join('\n');
   }
 
   goBack() {
