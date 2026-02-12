@@ -67,476 +67,476 @@ interface Project {
   standalone: true,
   imports: [CommonModule, FormsModule, BreadcrumbComponent, TaskDetailModalComponent, StageDetailModalComponent, HtmlRendererComponent],
   styles: [`
-  .details - grid {
+  .details-grid {
   display: grid;
-  grid - template - columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 1rem;
 }
 
-    .detail - item {
+    .detail-item {
   display: flex;
-  flex - direction: column;
+  flex-direction: column;
   gap: 0.25rem;
 }
 
-    .detail - label {
-  font - weight: 600;
+    .detail-label {
+  font-weight: 600;
   color: #4b5563;
-  font - size: 0.8rem;
-  margin - bottom: 0.25rem;
+  font-size: 0.8rem;
+  margin-bottom: 0.25rem;
 }
 
-    .detail - value {
+    .detail-value {
   padding: 0.5rem;
-  border - radius: 6px;
+  border-radius: 6px;
   border: 2px solid transparent;
   transition: all 0.2s;
 }
 
-    .detail - value:hover {
-  border - color: #e5e7eb;
+    .detail-value:hover {
+  border-color: #e5e7eb;
   background: #f9fafb;
 }
 
-    .links - container {
+    .links-container {
   display: flex;
-  flex - direction: column;
+  flex-direction: column;
   gap: 0.75rem;
 }
 
-    .link - item {
+    .link-item {
   display: flex;
-  align - items: center;
+  align-items: center;
   gap: 0.5rem;
   padding: 0.5rem;
   background: #f9fafb;
-  border - radius: 4px;
+  border-radius: 4px;
   border: 1px solid #e5e7eb;
-  font - size: 0.875rem;
+  font-size: 0.875rem;
 }
 
-    .link - name {
-  font - weight: 600;
+    .link-name {
+  font-weight: 600;
   color: #374151;
-  min - width: 100px;
+  min-width: 100px;
 }
 
-    .link - url {
+    .link-url {
   flex: 1;
   color: #3b82f6;
-  text - decoration: none;
+  text-decoration: none;
   overflow: hidden;
-  text - overflow: ellipsis;
-  white - space: nowrap;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-    .link - url:hover {
-  text - decoration: underline;
+    .link-url:hover {
+  text-decoration: underline;
 }
 
-    .add - link - form {
+    .add-link-form {
   display: flex;
   gap: 0.5rem;
-  align - items: center;
+  align-items: center;
   padding: 0.5rem;
   background: #f0f9ff;
-  border - radius: 4px;
+  border-radius: 4px;
   border: 2px dashed #3b82f6;
 }
 
-    .kanban - board {
+    .kanban-board {
   display: grid;
-  grid - template - columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 1rem;
-  min - height: 400px;
+  min-height: 400px;
 }
 
-    .kanban - column {
+    .kanban-column {
   background: #f9fafb;
-  border - radius: 8px;
+  border-radius: 8px;
   padding: 0;
   display: flex;
-  flex - direction: column;
+  flex-direction: column;
 }
 
-    .kanban - header {
+    .kanban-header {
   padding: 1rem;
-  border - bottom: 2px solid;
-  border - radius: 8px 8px 0 0;
+  border-bottom: 2px solid;
+  border-radius: 8px 8px 0 0;
   display: flex;
-  justify - content: space - between;
-  align - items: center;
+  justify-content: space-between;
+  align-items: center;
 }
 
-    .kanban - header h4 {
+    .kanban-header h4 {
   margin: 0;
-  font - size: 1rem;
+  font-size: 1rem;
 }
 
-    .kanban - tasks {
+    .kanban-tasks {
   padding: 1rem;
   flex: 1;
-  overflow - y: auto;
-  max - height: 600px;
+  overflow-y: auto;
+  max-height: 600px;
 }
 
-    .kanban - task {
+    .kanban-task {
   background: white;
-  border - radius: 8px;
+  border-radius: 8px;
   padding: 1rem;
-  margin - bottom: 0.75rem;
-  box - shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  margin-bottom: 0.75rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   cursor: pointer;
   transition: all 0.2s;
 }
 
-    .kanban - task:hover {
-  box - shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    .kanban-task:hover {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   transform: translateY(-2px);
 }
 
-    .kanban - task.task - done {
+    .kanban-task.task-done {
   opacity: 0.7;
 }
 
-    .kanban - task.task - done.kanban - task - title {
-  text - decoration: line - through;
+    .kanban-task.task-done.kanban-task-title {
+  text-decoration: line-through;
 }
 
-    .kanban - task - title {
+    .kanban-task-title {
   margin: 0 0 0.5rem 0;
-  font - size: 0.95rem;
-  font - weight: 600;
-  color: var(--bp - gray - 900);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--bp-gray-900);
 }
 
-    .kanban - task - description {
+    .kanban-task-description {
   margin: 0 0 0.75rem 0;
-  font - size: 0.875rem;
-  color: var(--bp - gray - 600);
-  line - height: 1.4;
+  font-size: 0.875rem;
+  color: var(--bp-gray-600);
+  line-height: 1.4;
 }
 
-    .kanban - task - footer {
+    .kanban-task-footer {
   display: flex;
   gap: 0.5rem;
-  flex - wrap: wrap;
+  flex-wrap: wrap;
 }
 
-    .stages - grid {
+    .stages-grid {
   display: grid;
-  grid - template - columns: repeat(auto - fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 1rem;
-  margin - top: 1rem;
+  margin-top: 1rem;
 }
 
-    .stage - button {
+    .stage-button {
   background: white;
   border: 2px solid #e2e8f0;
-  border - radius: 8px;
+  border-radius: 8px;
   padding: 0.75rem;
   cursor: pointer;
   transition: all 0.2s;
-  text - align: left;
+  text-align: left;
   position: relative;
   overflow: hidden;
 }
 
-    .stage - button::before {
+    .stage-button::before {
   content: '';
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   height: 4px;
-  background: linear - gradient(90deg, var(--bp - primary) 0 %, var(--bp - primary - light) 100 %);
+  background: linear-gradient(90deg, var(--bp-primary) 0%, var(--bp-primary-light) 100%);
   transform: scaleX(0);
-  transform - origin: left;
+  transform-origin: left;
   transition: transform 0.3s ease;
 }
 
-    .stage - button:hover {
-  border - color: var(--bp - primary);
-  box - shadow: 0 4px 12px rgba(14, 59, 51, 0.15);
+    .stage-button:hover {
+  border-color: var(--bp-primary);
+  box-shadow: 0 4px 12px rgba(14, 59, 51, 0.15);
   transform: translateY(-2px);
 }
 
-    .stage - button: hover::before {
+    .stage-button:hover::before {
   transform: scaleX(1);
 }
 
-    .stage - button - header {
+    .stage-button-header {
   display: flex;
-  align - items: center;
+  align-items: center;
   gap: 0.5rem;
-  margin - bottom: 0.4rem;
+  margin-bottom: 0.4rem;
 }
 
-    .stage - gem - icon {
+    .stage-gem-icon {
   display: flex;
-  align - items: center;
-  justify - content: center;
+  align-items: center;
+  justify-content: center;
   width: 20px;
   height: 20px;
 }
 
-    .stage - button - title {
+    .stage-button-title {
   margin: 0;
-  font - size: 0.9rem;
-  font - weight: 600;
+  font-size: 0.9rem;
+  font-weight: 600;
   color: #1a202c;
   flex: 1;
 }
 
-    .stage - button - meta {
+    .stage-button-meta {
   display: flex;
-  align - items: center;
+  align-items: center;
   gap: 0.5rem;
-  margin - bottom: 0.3rem;
+  margin-bottom: 0.3rem;
 }
 
-    .stage - button - badge {
-  font - size: 0.65rem;
+    .stage-button-badge {
+  font-size: 0.65rem;
   padding: 0.15rem 0.4rem;
   background: #6B46C1;
   color: white;
-  border - radius: 0.25rem;
-  font - weight: 600;
+  border-radius: 0.25rem;
+  font-weight: 600;
 }
 
-    .stage - gem - badge {
-  font - size: 0.65rem;
+    .stage-gem-badge {
+  font-size: 0.65rem;
   padding: 0.15rem 0.4rem;
   background: #4299E1;
   color: white;
-  border - radius: 0.25rem;
-  font - weight: 500;
+  border-radius: 0.25rem;
+  font-weight: 500;
 }
 
-    .stage - button - stats {
+    .stage-button-stats {
   display: flex;
   gap: 0.75rem;
-  font - size: 0.75rem;
+  font-size: 0.75rem;
   color: #718096;
 }
 
-    .stage - stat {
+    .stage-stat {
   display: flex;
-  align - items: center;
+  align-items: center;
   gap: 0.25rem;
 }
 
-    .stage - progress - bar {
-  margin - top: 0.4rem;
+    .stage-progress-bar {
+  margin-top: 0.4rem;
   height: 4px;
   background: #e2e8f0;
-  border - radius: 2px;
+  border-radius: 2px;
   overflow: hidden;
 }
 
-    .stage - progress - fill {
-  height: 100 %;
-  background: linear - gradient(90deg, var(--bp - primary) 0 %, var(--bp - primary - light) 100 %);
+    .stage-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--bp-primary) 0%, var(--bp-primary-light) 100%);
   transition: width 0.3s ease;
-  border - radius: 3px;
+  border-radius: 3px;
 }
 
-@media(max - width: 768px) {
-      .kanban - board {
-    grid - template - columns: 1fr;
+@media(max-width: 768px) {
+      .kanban-board {
+    grid-template-columns: 1fr;
   }
 
-      .stages - grid {
-    grid - template - columns: 1fr;
+      .stages-grid {
+    grid-template-columns: 1fr;
   }
 }
 `],
   template: `
-  < div class="bp-page" >
-    <div class="bp-container" >
-      <app-breadcrumb > </app-breadcrumb>
+  <div class="bp-page">
+    <div class="bp-container">
+      <app-breadcrumb></app-breadcrumb>
 
-      < div class="bp-loading" * ngIf="loading()" >
-        <div class="bp-spinner" > </div>
+      <div class="bp-loading" *ngIf="loading()">
+        <div class="bp-spinner"></div>
           </div>
 
-          < div * ngIf="!loading() && project()" >
-            <!--Fixed Save / Cancel Buttons-- >
-              <div * ngIf="hasUnsavedChanges" style = "position: fixed; top: 80px; right: 2rem; z-index: 999; display: flex; gap: 0.5rem; background: white; padding: 1rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);" >
-                <button class="bp-btn bp-btn-primary"(click) = "saveAllChanges()" >
+          <div *ngIf="!loading() && project()">
+            <!--Fixed Save / Cancel Buttons-->
+              <div *ngIf="hasUnsavedChanges" style="position: fixed; top: 80px; right: 2rem; z-index: 999; display: flex; gap: 0.5rem; background: white; padding: 1rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                <button class="bp-btn bp-btn-primary" (click)="saveAllChanges()">
               💾 Salvar Alterações
   </button>
-  < button class="bp-btn bp-btn-secondary"(click) = "cancelAllChanges()" >
+  <button class="bp-btn bp-btn-secondary" (click)="cancelAllChanges()">
               ✖️ Cancelar
   </button>
   </div>
 
-  < div class="bp-flex bp-justify-between bp-items-center bp-mb-2xl" >
-    <div style="flex: 1;" >
-      <div class="project-name-section"(click) = "startEditingField('name')" >
-        <h1 style="cursor: pointer; margin: 0;" >
-          <span * ngIf="!editingName" > {{ formData.name }}</span>
-            < input
-            * ngIf="editingName"
-type = "text"
+  <div class="bp-flex bp-justify-between bp-items-center bp-mb-2xl">
+    <div style="flex: 1;">
+      <div class="project-name-section" (click)="startEditingField('name')">
+        <h1 style="cursor: pointer; margin: 0;">
+          <span *ngIf="!editingName">{{ formData.name }}</span>
+            <input
+            *ngIf="editingName"
+type="text"
 class="bp-input"
-[(ngModel)] = "formData.name"
-  (blur) = "stopEditingField('name')"
-    (input) = "markAsChanged()"
-style = "font-size: 2rem; font-weight: bold; padding: 0.25rem; border: 2px solid #667eea;"
-  (keyup.enter) = "stopEditingField('name')"
+[(ngModel)]="formData.name"
+  (blur)="stopEditingField('name')"
+    (input)="markAsChanged()"
+style="font-size: 2rem; font-weight: bold; padding: 0.25rem; border: 2px solid #667eea;"
+  (keyup.enter)="stopEditingField('name')"
   />
   </h1>
   </div>
-  < div class="description-content" >
-    <app-html - renderer[content]="project()?.template?.description || ''" > </app-html-renderer>
+  <div class="description-content">
+    <app-html-renderer [content]="project()?.template?.description || ''"></app-html-renderer>
       </div>
-      < p class="bp-text-muted" >
-        Baseado em: { { project()!.template.name } }
+      <p class="bp-text-muted">
+        Baseado em: {{ project()!.template.name }}
 </p>
   </div>
-  < button class="bp-btn bp-btn-secondary"(click) = "goBack()" >
+  <button class="bp-btn bp-btn-secondary" (click)="goBack()">
               ← Voltar
   </button>
   </div>
 
-  < !--Project Details-- >
-    <div class="bp-card bp-mb-lg" >
-      <div class="bp-card-body" style = "padding: 1rem;" >
-        <h4 style="margin-bottom: 1rem; font-size: 1.1rem;" >📊 Detalhes do Projeto </h4>
+  <!--Project Details-->
+    <div class="bp-card bp-mb-lg">
+      <div class="bp-card-body" style="padding: 1rem;">
+        <h4 style="margin-bottom: 1rem; font-size: 1.1rem;">📊 Detalhes do Projeto </h4>
 
-          < !--Progress Bar-- >
-  <div style="margin-bottom: 1rem;" >
-    <div class="bp-flex bp-justify-between bp-items-center" style = "margin-bottom: 0.5rem;" >
-      <strong style="font-size: 0.9rem;" > Progresso </strong>
-        < div style = "display: flex; align-items: center; gap: 0.75rem;" >
-          <span * ngIf="getCurrentGem()" style = "display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.3rem 0.7rem; background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%); border-radius: 15px; border: 2px solid #e2e8f0;" >
-            <span[innerHTML]="getGemIcon(getCurrentGem()!.gemType)" style = "display: inline-flex;" > </span>
-              < span style = "font-weight: 600; color: #2d3748; font-size: 0.8rem;" > Você é { { getCurrentGem()!.name } } </span>
+          <!--Progress Bar-->
+  <div style="margin-bottom: 1rem;">
+    <div class="bp-flex bp-justify-between bp-items-center" style="margin-bottom: 0.5rem;">
+      <strong style="font-size: 0.9rem;"> Progresso </strong>
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+          <span *ngIf="getCurrentGem()" style="display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.3rem 0.7rem; background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%); border-radius: 15px; border: 2px solid #e2e8f0;">
+            <span [innerHTML]="getGemIcon(getCurrentGem()!.gemType)" style="display: inline-flex;"></span>
+              <span style="font-weight: 600; color: #2d3748; font-size: 0.8rem;">Você é {{ getCurrentGem()!.name }}</span>
                 </span>
-                < span class="bp-badge bp-badge-primary" style = "font-size: 0.85rem;" > {{ project()!.progress.toFixed(0) }}% </span>
+                <span class="bp-badge bp-badge-primary" style="font-size: 0.85rem;">{{ project()!.progress.toFixed(0) }}%</span>
                   </div>
                   </div>
-                  < div class="bp-progress" style = "height: 16px;" >
+                  <div class="bp-progress" style="height: 16px;">
                     <div 
                     class="bp-progress-bar"
-[style.width] = "project()!.progress + '%'"
-> </div>
+[style.width]="project()!.progress + '%'"
+></div>
 </div>
 </div>
 
-  < div class="details-grid" >
+  <div class="details-grid">
     <!--Price -->
-      <div class="detail-item" >
-        <label class="detail-label" >💰 Preço </label>
-          < div style = "cursor: pointer;" >
-            <div * ngIf="!editingPrice" class="detail-value"(click) = "startEditingField('price')" style = "font-size: 0.875rem;" >
-              <span * ngIf="formData.price" >
-                {{ getCurrencySymbol(formData.currency) }} { { formData.price } }
+      <div class="detail-item">
+        <label class="detail-label">💰 Preço </label>
+          <div style="cursor: pointer;">
+            <div *ngIf="!editingPrice" class="detail-value" (click)="startEditingField('price')" style="font-size: 0.875rem;">
+              <span *ngIf="formData.price">
+                {{ getCurrencySymbol(formData.currency) }} {{ formData.price }}
 </span>
-  < span * ngIf="!formData.price" class="bp-text-muted" style = "font-size: 0.8rem;" > Clique para definir </span>
+  <span *ngIf="!formData.price" class="bp-text-muted" style="font-size: 0.8rem;"> Clique para definir </span>
     </div>
-    < div * ngIf="editingPrice" style = "display: flex; gap: 0.25rem; align-items: center;" >
-      <select class="bp-input"[(ngModel)] = "formData.currency"(change) = "markAsChanged()" style = "max-width: 70px; font-size: 0.8rem; padding: 0.25rem;" >
-        <option * ngFor="let curr of currencies"[value] = "curr.code" > {{ curr.symbol }}</option>
+    <div *ngIf="editingPrice" style="display: flex; gap: 0.25rem; align-items: center;">
+      <select class="bp-input" [(ngModel)]="formData.currency" (change)="markAsChanged()" style="max-width: 70px; font-size: 0.8rem; padding: 0.25rem;">
+        <option *ngFor="let curr of currencies" [value]="curr.code">{{ curr.symbol }}</option>
           </select>
-          < input
+          <input
 #priceInput
-type = "text"
+type="text"
 class="bp-input"
-[(ngModel)] = "formData.price"
-  (input) = "markAsChanged()"
-    (keyup.enter) = "stopEditingField('price')"
-      (keyup.escape) = "cancelEditingField('price')"
-placeholder = "0.00"
-style = "flex: 1; font-size: 0.8rem; padding: 0.25rem;"
+[(ngModel)]="formData.price"
+  (input)="markAsChanged()"
+    (keyup.enter)="stopEditingField('price')"
+      (keyup.escape)="cancelEditingField('price')"
+placeholder="0.00"
+style="flex: 1; font-size: 0.8rem; padding: 0.25rem;"
   />
-  <button class="bp-btn bp-btn-sm bp-btn-primary"(click) = "stopEditingField('price')" title = "Confirmar" style = "padding: 0.25rem 0.5rem; font-size: 0.8rem;" >
+  <button class="bp-btn bp-btn-sm bp-btn-primary" (click)="stopEditingField('price')" title="Confirmar" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;">
                         ✓
 </button>
   </div>
   </div>
   </div>
 
-  < !--Sale Start Date-- >
-    <div class="detail-item" >
-      <label class="detail-label" >📅 Data de Início de Venda </label>
-        < div(click)="startEditingField('saleDate')" style = "cursor: pointer;" >
-          <div * ngIf="!editingSaleDate" class="detail-value" style = "font-size: 0.875rem;" >
-            <span * ngIf="formData.saleStartDate" > {{ formatDate(formData.saleStartDate) }}</span>
-              < span * ngIf="!formData.saleStartDate" class="bp-text-muted" style = "font-size: 0.8rem;" > Clique para definir </span>
+  <!--Sale Start Date-->
+    <div class="detail-item">
+      <label class="detail-label">📅 Data de Início de Venda </label>
+        <div (click)="startEditingField('saleDate')" style="cursor: pointer;">
+          <div *ngIf="!editingSaleDate" class="detail-value" style="font-size: 0.875rem;">
+            <span *ngIf="formData.saleStartDate">{{ formatDate(formData.saleStartDate) }}</span>
+              <span *ngIf="!formData.saleStartDate" class="bp-text-muted" style="font-size: 0.8rem;"> Clique para definir </span>
                 </div>
-                < input
-                * ngIf="editingSaleDate"
-type = "date"
+                <input
+                *ngIf="editingSaleDate"
+type="date"
 class="bp-input"
-[(ngModel)] = "formData.saleStartDate"
-  (blur) = "stopEditingField('saleDate')"
-    (change) = "markAsChanged()"
-style = "border: 2px solid #667eea; font-size: 0.8rem; padding: 0.25rem;"
+[(ngModel)]="formData.saleStartDate"
+  (blur)="stopEditingField('saleDate')"
+    (change)="markAsChanged()"
+style="border: 2px solid #667eea; font-size: 0.8rem; padding: 0.25rem;"
   />
   </div>
   </div>
 
-  < !--Status -->
-    <div class="detail-item" >
-      <label class="detail-label" >📍 Status </label>
-        < div style = "cursor: pointer;" >
+  <!--Status -->
+    <div class="detail-item">
+      <label class="detail-label">📍 Status </label>
+        <div style="cursor: pointer;">
           <select 
                       class="bp-input"
-[(ngModel)] = "formData.status"
-  (change) = "markAsChanged()"
-  [style.borderLeft] = "'4px solid ' + getStatusColor(formData.status)"
-style = "font-size: 0.8rem; padding: 0.25rem;"
+[(ngModel)]="formData.status"
+  (change)="markAsChanged()"
+  [style.borderLeft]="'4px solid ' + getStatusColor(formData.status)"
+style="font-size: 0.8rem; padding: 0.25rem;"
   >
-  <option * ngFor="let status of statuses"[value] = "status.value" >
+  <option *ngFor="let status of statuses" [value]="status.value">
     {{ status.label }}
 </option>
   </select>
   </div>
   </div>
 
-  < !--Links -->
-    <div class="detail-item" style = "grid-column: 1 / -1;" >
-      <label class="detail-label" >🔗 Links Úteis </label>
-        < div class="links-container" >
-          <div * ngFor="let link of getLinksArray()" class="link-item" >
-            <span class="link-name" > {{ link.name }}: </span>
-              < a[href]="link.url" target = "_blank" class="link-url" > {{ link.url }}</a>
-                < button class="bp-btn bp-btn-sm bp-btn-danger"(click) = "removeLink(link.name)" title = "Remover" style = "padding: 0.25rem 0.5rem; font-size: 0.75rem;" >
+  <!--Links -->
+    <div class="detail-item" style="grid-column: 1 / -1;">
+      <label class="detail-label">🔗 Links Úteis </label>
+        <div class="links-container">
+          <div *ngFor="let link of getLinksArray()" class="link-item">
+            <span class="link-name">{{ link.name }}: </span>
+              <a [href]="link.url" target="_blank" class="link-url">{{ link.url }}</a>
+                <button class="bp-btn bp-btn-sm bp-btn-danger" (click)="removeLink(link.name)" title="Remover" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">
                         ✖️
 </button>
   </div>
-  < div * ngIf="getLinksArray().length === 0 && !showAddLinkForm" class="bp-text-muted" style = "font-size: 0.875rem; margin-bottom: 0.5rem;" >
+  <div *ngIf="getLinksArray().length === 0 && !showAddLinkForm" class="bp-text-muted" style="font-size: 0.875rem; margin-bottom: 0.5rem;">
     Nenhum link adicionado
       </div>
-      < button
-      * ngIf="!showAddLinkForm"
+      <button
+      *ngIf="!showAddLinkForm"
 class="bp-btn bp-btn-primary bp-btn-sm"
-  (click) = "showAddLinkForm = true"
-style = "margin-top: 0.5rem; align-self: flex-start; padding: 0.4rem 0.8rem; font-size: 0.85rem;"
+  (click)="showAddLinkForm = true"
+style="margin-top: 0.5rem; align-self: flex-start; padding: 0.4rem 0.8rem; font-size: 0.85rem;"
   >
   + Adicionar Link
     </button>
-    < div * ngIf="showAddLinkForm" class="add-link-form" >
+    <div *ngIf="showAddLinkForm" class="add-link-form">
       <input 
                         type="text"
 class="bp-input"
-[(ngModel)] = "newLinkName"
-placeholder = "Nome (ex: Hotmart)"
-style = "flex: 1; font-size: 0.85rem; padding: 0.4rem;"
+[(ngModel)]="newLinkName"
+placeholder="Nome (ex: Hotmart)"
+style="flex: 1; font-size: 0.85rem; padding: 0.4rem;"
   />
   <input 
                         type="url"
 class="bp-input"
-[(ngModel)] = "newLinkUrl"
-placeholder = "URL (ex: https://hotmart.com/...)"
-style = "flex: 2; font-size: 0.85rem; padding: 0.4rem;"
+[(ngModel)]="newLinkUrl"
+placeholder="URL (ex: https://hotmart.com/...)"
+style="flex: 2; font-size: 0.85rem; padding: 0.4rem;"
   />
-  <button class="bp-btn bp-btn-primary bp-btn-sm"(click) = "addLink()" style = "padding: 0.4rem 0.6rem; font-size: 0.85rem;" >
+  <button class="bp-btn bp-btn-primary bp-btn-sm" (click)="addLink()" style="padding: 0.4rem 0.6rem; font-size: 0.85rem;">
                         ✓
 </button>
-  < button class="bp-btn bp-btn-secondary bp-btn-sm"(click) = "cancelAddLink()" style = "padding: 0.4rem 0.6rem; font-size: 0.85rem;" >
+  <button class="bp-btn bp-btn-secondary bp-btn-sm" (click)="cancelAddLink()" style="padding: 0.4rem 0.6rem; font-size: 0.85rem;">
                         ✖
 </button>
   </div>
@@ -546,137 +546,137 @@ style = "flex: 2; font-size: 0.85rem; padding: 0.4rem;"
   </div>
   </div>
 
-  < !--Stages Buttons-- >
-    <div class="bp-card bp-mb-lg" >
-      <div class="bp-card-header" >
-        <div class="bp-flex bp-justify-between bp-items-center" >
-          <h3 class="bp-card-title" >🎯 Etapas do Projeto </h3>
-            < span class= "bp-badge bp-badge-primary" > {{ project()!.projectStages.length }} etapas </span>
+  <!--Stages Buttons-->
+    <div class="bp-card bp-mb-lg">
+      <div class="bp-card-header">
+        <div class="bp-flex bp-justify-between bp-items-center">
+          <h3 class="bp-card-title">🎯 Etapas do Projeto </h3>
+            <span class="bp-badge bp-badge-primary">{{ project()!.projectStages.length }} etapas </span>
               </div>
               </div>
-              < div class="bp-card-body" >
-                <div class="stages-grid" >
+              <div class="bp-card-body">
+                <div class="stages-grid">
                   <button 
-                  * ngFor="let stage of project()!.projectStages"
+                  *ngFor="let stage of project()!.projectStages"
 class="stage-button"
-  (click) = "openStageModal(stage)"
+  (click)="openStageModal(stage)"
   >
-  <div class="stage-button-header" >
-    <span class="stage-gem-icon" * ngIf="stage.gemType"[innerHTML] = "getGemIcon(stage.gemType)" > </span>
-      < h4 class="stage-button-title" style = "margin: 0; display: flex; align-items: center; gap: 0.5rem;" >
+  <div class="stage-button-header">
+    <span class="stage-gem-icon" *ngIf="stage.gemType" [innerHTML]="getGemIcon(stage.gemType)"></span>
+      <h4 class="stage-button-title" style="margin: 0; display: flex; align-items: center; gap: 0.5rem;">
         {{ stage.name }}
-</h4>  </div >
-  <div class="stage-button-stats" >
-    <span class="stage-stat" >
-                      📝 { { stage.tasks.length } } tarefa{ { stage.tasks.length !== 1 ? 's' : '' } }
+</h4>  </div>
+  <div class="stage-button-stats">
+    <span class="stage-stat">
+                      📝 {{ stage.tasks.length }} tarefa{{ stage.tasks.length !== 1 ? 's' : '' }}
 </span>
-  < span class="stage-stat" >
-                      ✓ { { getCompletedTasksInStage(stage) } } concluída{ { getCompletedTasksInStage(stage) !== 1 ? 's' : '' } }
+  <span class="stage-stat">
+                      ✓ {{ getCompletedTasksInStage(stage) }} concluída{{ getCompletedTasksInStage(stage) !== 1 ? 's' : '' }}
 </span>
   </div>
-  < div class="stage-progress-bar" >
-    <div class="stage-progress-fill"[style.width] = "getStageProgress(stage) + '%'" > </div>
+  <div class="stage-progress-bar">
+    <div class="stage-progress-fill" [style.width]="getStageProgress(stage) + '%'"></div>
       </div>
       </button>
       </div>
       </div>
       </div>
 
-      < !--Minhas Tarefas-- >
-        <div class="bp-card bp-mb-lg" >
-          <div class="bp-card-header" >
-            <div class="bp-flex bp-justify-between bp-items-center" >
-              <h3 class="bp-card-title" >📋 Minhas Tarefas </h3>
-                < span class="bp-badge bp-badge-primary" > {{ getAllTasks().length }} tarefas </span>
+      <!--Minhas Tarefas-->
+        <div class="bp-card bp-mb-lg">
+          <div class="bp-card-header">
+            <div class="bp-flex bp-justify-between bp-items-center">
+              <h3 class="bp-card-title">📋 Minhas Tarefas </h3>
+                <span class="bp-badge bp-badge-primary">{{ getAllTasks().length }} tarefas </span>
                   </div>
                   </div>
-                  < div class="bp-card-body" >
-                    <div class="kanban-board" >
-                      <!--TODO Column-- >
-                        <div class="kanban-column" >
-                          <div class="kanban-header" style = "background: #fee; border-color: #fcc;" >
-                            <h4>🔴 Para Iniciar </h4>
-                              < span class="bp-badge bp-badge-secondary" > {{ getTasksByStatus('TODO').length }}</span>
+                  <div class="bp-card-body">
+                    <div class="kanban-board">
+                      <!--TODO Column-->
+                        <div class="kanban-column">
+                          <div class="kanban-header" style="background: #fee; border-color: #fcc;">
+                            <h4>🔴 Para Iniciar</h4>
+                              <span class="bp-badge bp-badge-secondary">{{ getTasksByStatus('TODO').length }}</span>
                                 </div>
-                                < div class="kanban-tasks" >
+                                <div class="kanban-tasks">
                                   <div 
-                      * ngFor="let task of getTasksByStatus('TODO')"
+                      *ngFor="let task of getTasksByStatus('TODO')"
 class="kanban-task"
-  (click) = "openTaskModal(task)"
+  (click)="openTaskModal(task)"
   >
-  <h5 class="kanban-task-title" > {{ task.title }}</h5>
+  <h5 class="kanban-task-title">{{ task.title }}</h5>
 
-    < div class="kanban-task-footer" >
-      <span class="bp-badge bp-badge-secondary bp-text-sm" * ngIf="task.stageName" >
-        <span * ngIf="task.stageGemType"[innerHTML] = "getGemIcon(task.stageGemType)" style = "display: inline-block; vertical-align: middle; margin-right: 4px;" > </span>
-{ { task.stageName } }
+    <div class="kanban-task-footer">
+      <span class="bp-badge bp-badge-secondary bp-text-sm" *ngIf="task.stageName">
+        <span *ngIf="task.stageGemType" [innerHTML]="getGemIcon(task.stageGemType)" style="display: inline-block; vertical-align: middle; margin-right: 4px;"></span>
+{{ task.stageName }}
 </span>
-  < span class="bp-badge bp-badge-info bp-text-sm" >
+  <span class="bp-badge bp-badge-info bp-text-sm">
     {{ getCompletedSubtasksCount(task) }}/{{ task.subtasks.length }}
 </span>
   </div>
   </div>
-  < p * ngIf="getTasksByStatus('TODO').length === 0" class="bp-text-muted bp-text-center" style = "padding: 2rem;" >
+  <p *ngIf="getTasksByStatus('TODO').length === 0" class="bp-text-muted bp-text-center" style="padding: 2rem;">
     Nenhuma tarefa
       </p>
       </div>
       </div>
 
-      < !--IN_PROGRESS Column-- >
-        <div class="kanban-column" >
-          <div class="kanban-header" style = "background: #fef3c7; border-color: #fde68a;" >
-            <h4>🟡 Em Progresso </h4>
-              < span class="bp-badge bp-badge-secondary" > {{ getTasksByStatus('IN_PROGRESS').length }}</span>
+      <!--IN_PROGRESS Column-->
+        <div class="kanban-column">
+          <div class="kanban-header" style="background: #fef3c7; border-color: #fde68a;">
+            <h4>🟡 Em Progresso</h4>
+              <span class="bp-badge bp-badge-secondary">{{ getTasksByStatus('IN_PROGRESS').length }}</span>
                 </div>
-                < div class="kanban-tasks" >
+                <div class="kanban-tasks">
                   <div 
-                      * ngFor="let task of getTasksByStatus('IN_PROGRESS')"
+                      *ngFor="let task of getTasksByStatus('IN_PROGRESS')"
 class="kanban-task"
-  (click) = "openTaskModal(task)"
+  (click)="openTaskModal(task)"
   >
-  <h5 class="kanban-task-title" > {{ task.title }}</h5>
+  <h5 class="kanban-task-title">{{ task.title }}</h5>
 
-    < div class="kanban-task-footer" >
-      <span class="bp-badge bp-badge-secondary bp-text-sm" * ngIf="task.stageName" >
-        <span * ngIf="task.stageGemType"[innerHTML] = "getGemIcon(task.stageGemType)" style = "display: inline-block; vertical-align: middle; margin-right: 4px;" > </span>
-{ { task.stageName } }
+    <div class="kanban-task-footer">
+      <span class="bp-badge bp-badge-secondary bp-text-sm" *ngIf="task.stageName">
+        <span *ngIf="task.stageGemType" [innerHTML]="getGemIcon(task.stageGemType)" style="display: inline-block; vertical-align: middle; margin-right: 4px;"></span>
+{{ task.stageName }}
 </span>
-  < span class="bp-badge bp-badge-info bp-text-sm" >
+  <span class="bp-badge bp-badge-info bp-text-sm">
     {{ getCompletedSubtasksCount(task) }}/{{ task.subtasks.length }}
 </span>
   </div>
   </div>
-  < p * ngIf="getTasksByStatus('IN_PROGRESS').length === 0" class="bp-text-muted bp-text-center" style = "padding: 2rem;" >
+  <p *ngIf="getTasksByStatus('IN_PROGRESS').length === 0" class="bp-text-muted bp-text-center" style="padding: 2rem;">
     Nenhuma tarefa
       </p>
       </div>
       </div>
 
-      < !--DONE Column-- >
-        <div class="kanban-column" >
-          <div class="kanban-header" style = "background: #d1fae5; border-color: #a7f3d0;" >
-            <h4>🟢 Finalizadas </h4>
-              < span class="bp-badge bp-badge-secondary" > {{ getTasksByStatus('DONE').length }}</span>
+      <!--DONE Column-->
+        <div class="kanban-column">
+          <div class="kanban-header" style="background: #d1fae5; border-color: #a7f3d0;">
+            <h4>🟢 Finalizadas</h4>
+              <span class="bp-badge bp-badge-secondary">{{ getTasksByStatus('DONE').length }}</span>
                 </div>
-                < div class="kanban-tasks" >
+                <div class="kanban-tasks">
                   <div 
-                      * ngFor="let task of getTasksByStatus('DONE')"
+                      *ngFor="let task of getTasksByStatus('DONE')"
 class="kanban-task task-done"
-  (click) = "openTaskModal(task)"
+  (click)="openTaskModal(task)"
   >
-  <h5 class="kanban-task-title" > {{ task.title }}</h5>
+  <h5 class="kanban-task-title">{{ task.title }}</h5>
 
-    < div class="kanban-task-footer" >
-      <span class="bp-badge bp-badge-secondary bp-text-sm" * ngIf="task.stageName" >
-        <span * ngIf="task.stageGemType"[innerHTML] = "getGemIcon(task.stageGemType)" style = "display: inline-block; vertical-align: middle; margin-right: 4px;" > </span>
-{ { task.stageName } }
+    <div class="kanban-task-footer">
+      <span class="bp-badge bp-badge-secondary bp-text-sm" *ngIf="task.stageName">
+        <span *ngIf="task.stageGemType" [innerHTML]="getGemIcon(task.stageGemType)" style="display: inline-block; vertical-align: middle; margin-right: 4px;"></span>
+{{ task.stageName }}
 </span>
-  < span class="bp-badge bp-badge-success bp-text-sm" >
+  <span class="bp-badge bp-badge-success bp-text-sm">
     {{ getCompletedSubtasksCount(task) }}/{{ task.subtasks.length }}
 </span>
   </div>
   </div>
-  < p * ngIf="getTasksByStatus('DONE').length === 0" class="bp-text-muted bp-text-center" style = "padding: 2rem;" >
+  <p *ngIf="getTasksByStatus('DONE').length === 0" class="bp-text-muted bp-text-center" style="padding: 2rem;">
     Nenhuma tarefa
       </p>
       </div>
@@ -686,22 +686,22 @@ class="kanban-task task-done"
       </div>
       </div>
 
-      < !--Task Detail Modal-- >
-        <app-task - detail - modal
+      <!--Task Detail Modal-->
+        <app-task-detail-modal
         [projectId]="projectId"
-        [task] = "selectedTask()"
-        [isOpen] = "isTaskModalOpen()"
-          (closed) = "closeTaskModal()"
-            (taskUpdated) = "onTaskUpdated()"
+        [task]="selectedTask()"
+        [isOpen]="isTaskModalOpen()"
+          (closed)="closeTaskModal()"
+            (taskUpdated)="onTaskUpdated()"
             > </app-task-detail-modal>
 
-          < !--Stage Detail Modal-- >
-            <app-stage - detail - modal
+          <!--Stage Detail Modal-->
+            <app-stage-detail-modal
             [projectId]="projectId"
-            [stage] = "selectedStage()"
-            [isOpen] = "isStageModalOpen()"
-              (closed) = "closeStageModal()"
-                (stageUpdated) = "onStageUpdated()"
+            [stage]="selectedStage()"
+            [isOpen]="isStageModalOpen()"
+              (closed)="closeStageModal()"
+                (stageUpdated)="onStageUpdated()"
                 > </app-stage-detail-modal>
                 </div>
               </div>
@@ -765,7 +765,7 @@ export class ProjectDetailComponent implements OnInit {
 
   async loadProject(id: string) {
     try {
-      const data = await this.http.get<Project>(`${environment.apiUrl} /projects/${id}?t = ${Date.now()} `).toPromise();
+      const data = await this.http.get<Project>(`${environment.apiUrl}/projects/${id}?t=${Date.now()}`).toPromise();
       this.project.set(data || null);
       this.initializeFormData(data);
     } catch (err) {
@@ -799,7 +799,7 @@ export class ProjectDetailComponent implements OnInit {
         const priceInput = document.querySelector('input[placeholder="0.00"]') as HTMLInputElement;
         if (priceInput) priceInput.focus();
       } else {
-        const input = document.querySelector(`input: not([type = "checkbox"]): focus, input: not([type = "checkbox"])[type = "text"], input: not([type = "checkbox"])[type = "date"], input: not([type = "checkbox"])[type = "url"]`) as HTMLInputElement;
+        const input = document.querySelector(`input:not([type="checkbox"]):focus, input:not([type="checkbox"])[type="text"], input:not([type="checkbox"])[type="date"], input:not([type="checkbox"])[type="url"]`) as HTMLInputElement;
         if (input) input.focus();
       }
     }, 0);
@@ -837,7 +837,7 @@ export class ProjectDetailComponent implements OnInit {
 
   async saveAllChanges() {
     try {
-      await this.http.patch(`${environment.apiUrl} /projects/${this.projectId}/details`, {
+      await this.http.patch(`${environment.apiUrl}/projects/${this.projectId}/details`, {
         name: this.formData.name,
         status: this.formData.status,
         price: this.formData.price || null,
