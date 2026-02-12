@@ -76,7 +76,10 @@ interface Project {
           </div>
 
           <!-- Stages -->
-          <div *ngFor="let stage of project()!.projectStages; let si = index" class="bp-card bp-mb-lg" style="border-left: 4px solid #4f46e5;">
+          <div *ngFor="let stage of project()!.projectStages; let si = index" 
+               [id]="'stage-' + si"
+               class="bp-card bp-mb-lg" 
+               style="border-left: 4px solid #4f46e5;">
             <div class="bp-card-header" style="background: #f5f5ff;">
               <div class="bp-flex bp-justify-between bp-items-center bp-gap-md">
                 <div class="bp-flex bp-items-center bp-gap-sm" style="flex: 1;">
@@ -328,6 +331,7 @@ export class ProjectManageComponent implements OnInit {
     stages.forEach((s, i) => s.order = i);
 
     this.project.set({ ...proj, projectStages: stages });
+    this.scrollToStage(index - 1);
   }
 
   moveStageDown(index: number) {
@@ -341,6 +345,23 @@ export class ProjectManageComponent implements OnInit {
     stages.forEach((s, i) => s.order = i);
 
     this.project.set({ ...proj, projectStages: stages });
+    this.scrollToStage(index + 1);
+  }
+
+  private scrollToStage(index: number) {
+    setTimeout(() => {
+      const element = document.getElementById(`stage-${index}`);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        // Add a temporary highlight effect
+        element.style.transition = 'background-color 0.5s';
+        const originalBg = element.style.backgroundColor;
+        element.style.backgroundColor = '#f0f7ff';
+        setTimeout(() => {
+          element.style.backgroundColor = originalBg;
+        }, 1000);
+      }
+    }, 100);
   }
 
   async removeTaskFromStage(stageIndex: number, taskIndex: number) {
