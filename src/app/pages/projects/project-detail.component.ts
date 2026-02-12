@@ -233,6 +233,7 @@ interface Project {
     .stage-button {
   background: white;
   border: 2px solid #e2e8f0;
+  border-left-width: 4px;
   border-radius: 8px;
   padding: 0.75rem;
   cursor: pointer;
@@ -560,10 +561,11 @@ style="flex: 2; font-size: 0.85rem; padding: 0.4rem;"
                   *ngFor="let stage of project()!.projectStages"
 class="stage-button"
   (click)="openStageModal(stage)"
+  [style.borderLeftColor]="gemUtils.getGemColor(stage.gemType)"
   >
   <div class="stage-button-header">
     <span class="stage-gem-icon" *ngIf="stage.gemType" [innerHTML]="getGemIcon(stage.gemType)"></span>
-      <h4 class="stage-button-title" style="margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+      <h4 class="stage-button-title" [style.color]="gemUtils.getGemColor(stage.gemType)" style="margin: 0; display: flex; align-items: center; gap: 0.5rem;">
         {{ stage.name }}
 </h4>  </div>
   <div class="stage-button-stats">
@@ -712,7 +714,7 @@ export class ProjectDetailComponent implements OnInit {
   private router = inject(Router);
   private http = inject(HttpClient);
   private toast = inject(ToastService);
-  private gemUtils = inject(GemUtilsService);
+  public gemUtils = inject(GemUtilsService);
 
   projectId: string = '';
   project = signal<Project | null>(null);

@@ -6,6 +6,8 @@ import { AuthService } from '../../services/auth.service';
 import { ToastService } from '../../services/toast.service';
 import { BreadcrumbService } from '../../services/breadcrumb.service';
 import { BreadcrumbComponent } from '../../components/breadcrumb.component';
+import { HtmlRendererComponent } from '../../components/html-renderer.component';
+import { GemUtilsService } from '../../services/gem-utils.service';
 import { environment } from '../../../environments/environment';
 
 interface Subtask {
@@ -25,6 +27,7 @@ interface Stage {
   name: string;
   description?: string;
   order: number;
+  gemType?: string;
   tasks: Task[];
 }
 
@@ -42,7 +45,7 @@ interface Template {
 @Component({
   selector: 'app-template-detail',
   standalone: true,
-  imports: [CommonModule, RouterModule, BreadcrumbComponent],
+  imports: [CommonModule, RouterModule, BreadcrumbComponent, HtmlRendererComponent],
   template: `
     <div class="bp-page">
       <div class="bp-container">
@@ -62,7 +65,9 @@ interface Template {
                   ` + '{{ template()!.isActive ? "Ativo" : "Inativo" }}' + `
                 </span>
               </div>
-              <p class="bp-text-muted" *ngIf="template()!.description">` + '{{ template()!.description }}' + `</p>
+              <div class="description-content" *ngIf="template()!.description" style="margin-top: 0.5rem;">
+                <app-html-renderer [content]="template()!.description || ''"></app-html-renderer>
+              </div>
             </div>
             <div class="bp-flex bp-gap-md">
               <button routerLink="/templates" class="bp-btn bp-btn-secondary">
@@ -119,14 +124,25 @@ interface Template {
           <div *ngIf="template()!.stages.length > 0">
             <h3 class="bp-mb-lg">🗂️ Estrutura do Template</h3>
             
-            <div *ngFor="let stage of template()!.stages; let si = index" class="bp-card bp-mb-lg" style="border-left: 4px solid #4f46e5;">
+            <div *ngFor="let stage of template()!.stages; let si = index" 
+                 class="bp-card bp-mb-lg" 
+                 [style.borderLeft]="'4px solid ' + gemUtils.getGemColor(stage.gemType || 'ESMERALDA')">
               <div class="bp-card-header" style="background: #f5f5ff;">
                 <div class="bp-flex bp-justify-between bp-items-start">
-                  <div>
-                    <h4 style="margin: 0; color: #4f46e5;">📋 Etapa {{ si + 1 }}: {{ stage.name }}</h4>
-                    <p class="bp-text-muted bp-text-sm bp-mt-sm" *ngIf="stage.description">{{ stage.description }}</p>
+                  <div class="bp-flex bp-items-start bp-gap-md">
+                    <span class="stage-gem-icon" *ngIf="stage.gemType" [innerHTML]="gemUtils.getGemIcon(stage.gemType, 24)"></span>
+                    <div>
+                      <h4 style="margin: 0;" [style.color]="gemUtils.getGemColor(stage.gemType || 'ESMERALDA')">
+                        Etapa {{ si + 1 }}: {{ stage.name }}
+                      </h4>
+                      <div class="bp-mt-sm" *ngIf="stage.description">
+                        <app-html-renderer [content]="stage.description"></app-html-renderer>
+                      </div>
+                    </div>
                   </div>
-                  <span class="bp-badge bp-badge-primary">{{ stage.tasks.length }} tarefas</span>
+                  <span class="bp-badge bp-badge-primary" style="white-space: nowrap;">
+                    {{ stage.tasks.length }} tarefa{{ stage.tasks.length !== 1 ? 's' : '' }}
+                  </span>
                 </div>
               </div>
               <div class="bp-card-body">
@@ -137,7 +153,9 @@ interface Template {
                         <span class="bp-badge bp-badge-secondary" style="min-width: 28px; text-align: center;">{{ ti + 1 }}</span>
                         <div style="flex: 1;">
                           <h5 style="margin: 0; font-size: 0.95rem;">{{ task.title }}</h5>
-                          <p class="bp-text-muted bp-text-sm bp-mt-xs" *ngIf="task.description">{{ task.description }}</p>
+                          <div class="bp-mt-xs" *ngIf="task.description">
+                            <app-html-renderer [content]="task.description"></app-html-renderer>
+                          </div>
                         </div>
                       </div>
                       <div *ngIf="task.subtasks.length > 0" style="margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid #e5e7eb;">
@@ -173,7 +191,9 @@ interface Template {
                       <span class="bp-badge bp-badge-secondary" style="min-width: 28px; text-align: center;">{{ i + 1 }}</span>
                       <div style="flex: 1;">
                         <h5 style="margin: 0; font-size: 0.95rem;">{{ task.title }}</h5>
-                        <p class="bp-text-muted bp-text-sm bp-mt-xs" *ngIf="task.description">{{ task.description }}</p>
+                        <div class="bp-mt-xs" *ngIf="task.description">
+                          <app-html-renderer [content]="task.description"></app-html-renderer>
+                        </div>
                       </div>
                     </div>
                     <div *ngIf="task.subtasks.length > 0" style="margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid #e5e7eb;">
@@ -230,6 +250,7 @@ export class TemplateDetailComponent implements OnInit, OnDestroy {
   private authService = inject(AuthService);
   private toast = inject(ToastService);
   private breadcrumbService = inject(BreadcrumbService);
+  public gemUtils = inject(GemUtilsService);
 
   template = signal<Template | null>(null);
   loading = signal(true);
