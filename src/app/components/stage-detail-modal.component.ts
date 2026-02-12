@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { ToastService } from '../services/toast.service';
+import { ConfirmService } from '../services/confirm.service';
 import { GemAchievementModalComponent } from './gem-achievement-modal.component';
 import { GemUtilsService } from '../services/gem-utils.service';
 import { TaskCardComponent } from './task-card.component';
@@ -92,6 +93,7 @@ interface Stage {
               [showHeader]="true"
               [showProgress]="true"
               (taskUpdated)="onTaskUpdated()"
+              (taskChanged)="onTaskChanged()"
             ></app-task-card>
           </div>
 
@@ -100,9 +102,9 @@ interface Stage {
           </div>
         </div>
 
-        <div class="modal-footer">
-          <button class="btn-save" (click)="saveAllAnswers()">
-            💾 Salvar Respostas
+        <div class="modal-footer" *ngIf="isDirty">
+          <button class="btn-save" (click)="saveAllAnswers()" [disabled]="isSaving">
+            {{ isSaving ? 'Salvando...' : '💾 Salvar Respostas' }}
           </button>
         </div>
       </div>
@@ -495,6 +497,10 @@ export class StageDetailModalComponent {
 
   showGemModal = false;
   newGemType: string | null = null;
+  isDirty = false;
+  isSaving = false;
+
+  private confirmService = inject(ConfirmService);
 
   constructor(
     private http: HttpClient,
@@ -503,7 +509,16 @@ export class StageDetailModalComponent {
 
   private gemUtils = inject(GemUtilsService);
 
-  close() {
+  async close() {
+    if (this.isDirty) {
+      const confirmed = await this.confirmService.confirm(
+        'Alterações não salvas',
+        'Você possui alterações não salvas em respostas ou links. Deseja sair mesmo assim?',
+        { type: 'warning', confirmText: 'Sair sem salvar', cancelText: 'Continuar editando' }
+      );
+      if (!confirmed) return;
+    }
+    this.isDirty = false;
     this.closed.emit();
   }
 
@@ -532,6 +547,10 @@ export class StageDetailModalComponent {
 
   onTaskUpdated() {
     this.stageUpdated.emit();
+  }
+
+  onTaskChanged() {
+    this.isDirty = true;
   }
 
   async toggleSubtask(subtask: Subtask) {
@@ -574,16 +593,31 @@ export class StageDetailModalComponent {
   async saveAllAnswers() {
     if (!this.projectId || !this.stage?.tasks) return;
 
+    this.isSaving = true;
     try {
       const promises: Promise<any>[] = [];
 
-      // Coletar todas as subtarefas de todas as tarefas
+      // Coletar todas as subtarefas e tarefas
       for (const task of this.stage.tasks) {
+        // Save task link
+        promises.push(
+          this.http.patch(`${environment.apiUrl}/projects/${this.projectId}/tasks/${task.id}/link`, {
+            link: task.link || null
+          }).toPromise()
+        );
+
         for (const subtask of task.subtasks || []) {
           if (subtask.id) {
+            // Save subtask answer
             promises.push(
               this.http.patch(`${environment.apiUrl}/projects/${this.projectId}/subtasks/${subtask.id}/answer`, {
                 answer: subtask.answer || ''
+              }).toPromise()
+            );
+            // Save subtask link
+            promises.push(
+              this.http.patch(`${environment.apiUrl}/projects/${this.projectId}/subtasks/${subtask.id}/link`, {
+                link: subtask.link || null
               }).toPromise()
             );
           }
@@ -591,10 +625,14 @@ export class StageDetailModalComponent {
       }
 
       await Promise.all(promises);
-      this.toast.success('Todas as respostas foram salvas!');
+      this.isDirty = false;
+      this.toast.success('Todas as respostas e links foram salvos!');
+      this.stageUpdated.emit();
     } catch (err) {
       console.error('Failed to save answers:', err);
       this.toast.error('Erro ao salvar respostas');
+    } finally {
+      this.isSaving = false;
     }
   }
 }

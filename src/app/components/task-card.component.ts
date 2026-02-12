@@ -302,6 +302,7 @@ export class TaskCardComponent {
   @Input() taskNumber?: number;
   @Input() isExpanded = false;
   @Output() taskUpdated = new EventEmitter<void>();
+  @Output() taskChanged = new EventEmitter<void>();
 
   private http = inject(HttpClient);
   private toast = inject(ToastService);
@@ -332,36 +333,26 @@ export class TaskCardComponent {
     this.tempTaskLink = '';
   }
 
-  async saveTaskLink() {
+  saveTaskLink() {
     const link = this.tempTaskLink?.trim();
     if (!link) {
       this.toast.error('Digite um link válido');
       return;
     }
 
-    try {
-      await this.http.patch(`${environment.apiUrl}/projects/${this.projectId}/tasks/${this.task.id}/link`, { link }).toPromise();
+    if (this.task) {
       this.task.link = link;
-      this.editingTaskLink = false;
-      this.tempTaskLink = '';
-      this.toast.success('Link da tarefa salvo!');
-      this.taskUpdated.emit();
-    } catch (err) {
-      console.error('Failed to save task link:', err);
-      this.toast.error('Erro ao salvar link da tarefa');
     }
+    this.editingTaskLink = false;
+    this.tempTaskLink = '';
+    this.taskChanged.emit();
   }
 
   async removeTaskLink() {
-    try {
-      await this.http.patch(`${environment.apiUrl}/projects/${this.projectId}/tasks/${this.task.id}/link`, { link: null }).toPromise();
+    if (this.task) {
       this.task.link = undefined;
-      this.toast.success('Link da tarefa removido!');
-      this.taskUpdated.emit();
-    } catch (err) {
-      console.error('Failed to remove task link:', err);
-      this.toast.error('Erro ao remover link da tarefa');
     }
+    this.taskChanged.emit();
   }
 
   // Subtask methods
@@ -378,13 +369,7 @@ export class TaskCardComponent {
   }
 
   async onSubtaskAnswerChange(subtask: Subtask) {
-    try {
-      await this.http.patch(`${environment.apiUrl}/projects/${this.projectId}/subtasks/${subtask.id}/answer`, {
-        answer: subtask.answer || ''
-      }).toPromise();
-    } catch (err) {
-      console.error('Failed to save subtask answer:', err);
-    }
+    this.taskChanged.emit();
   }
 
   // Subtask link methods
@@ -402,35 +387,21 @@ export class TaskCardComponent {
     delete this.tempSubtaskLinks[subtaskId];
   }
 
-  async saveSubtaskLink(subtask: Subtask) {
+  saveSubtaskLink(subtask: Subtask) {
     const link = this.tempSubtaskLinks[subtask.id]?.trim();
     if (!link) {
       this.toast.error('Digite um link válido');
       return;
     }
 
-    try {
-      await this.http.patch(`${environment.apiUrl}/projects/${this.projectId}/subtasks/${subtask.id}/link`, { link }).toPromise();
-      subtask.link = link;
-      this.editingSubtaskLinks.delete(subtask.id);
-      delete this.tempSubtaskLinks[subtask.id];
-      this.toast.success('Link da subtarefa salvo!');
-      this.taskUpdated.emit();
-    } catch (err) {
-      console.error('Failed to save subtask link:', err);
-      this.toast.error('Erro ao salvar link da subtarefa');
-    }
+    subtask.link = link;
+    this.editingSubtaskLinks.delete(subtask.id);
+    delete this.tempSubtaskLinks[subtask.id];
+    this.taskChanged.emit();
   }
 
   async removeSubtaskLink(subtask: Subtask) {
-    try {
-      await this.http.patch(`${environment.apiUrl}/projects/${this.projectId}/subtasks/${subtask.id}/link`, { link: null }).toPromise();
-      subtask.link = undefined;
-      this.toast.success('Link da subtarefa removido!');
-      this.taskUpdated.emit();
-    } catch (err) {
-      console.error('Failed to remove subtask link:', err);
-      this.toast.error('Erro ao remover link da subtarefa');
-    }
+    subtask.link = undefined;
+    this.taskChanged.emit();
   }
 }

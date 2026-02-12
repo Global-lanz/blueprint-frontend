@@ -3,10 +3,10 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { ToastService } from '../services/toast.service';
+import { ConfirmService } from '../services/confirm.service';
 import { GemAchievementModalComponent } from './gem-achievement-modal.component';
 import { GemUtilsService } from '../services/gem-utils.service';
 import { HtmlRendererComponent } from './html-renderer.component';
-import { RichTextEditorComponent } from './rich-text-editor.component';
 import { environment } from '../../environments/environment';
 
 interface Subtask {
@@ -34,7 +34,7 @@ interface Task {
   selector: 'app-task-detail-modal',
   standalone: true,
 
-  imports: [CommonModule, FormsModule, GemAchievementModalComponent, HtmlRendererComponent, RichTextEditorComponent],
+  imports: [CommonModule, FormsModule, GemAchievementModalComponent, HtmlRendererComponent],
   template: `
     <div class="modal-overlay" *ngIf="isOpen" (click)="close()">
       <div class="modal-content" (click)="$event.stopPropagation()">
@@ -54,27 +54,11 @@ interface Task {
         <div class="modal-body">
           <!-- Description Section -->
           <div class="task-description-section" style="margin-bottom: 1.5rem;">
-            <div *ngIf="!isEditingDescription" class="description-view">
-              <div *ngIf="task?.description" class="task-description">
-                <app-html-renderer [content]="task.description"></app-html-renderer>
-              </div>
-              <div *ngIf="!task?.description" class="no-description bp-text-muted">
-                Sem descrição.
-              </div>
-              <button class="bp-btn bp-btn-sm bp-btn-secondary bp-mt-sm" (click)="startEditingDescription()">
-                ✏️ Editar Descrição
-              </button>
+            <div *ngIf="task?.description" class="task-description">
+              <app-html-renderer [content]="task.description"></app-html-renderer>
             </div>
-
-            <div *ngIf="isEditingDescription" class="description-edit">
-              <app-rich-text-editor 
-                [(ngModel)]="tempDescription" 
-                placeholder="Descreva a tarefa..."
-              ></app-rich-text-editor>
-              <div class="edit-actions bp-mt-sm" style="display: flex; gap: 0.5rem;">
-                <button class="bp-btn bp-btn-primary bp-btn-sm" (click)="saveDescription()">💾 Salvar</button>
-                <button class="bp-btn bp-btn-secondary bp-btn-sm" (click)="cancelEditingDescription()">✖ Cancelar</button>
-              </div>
+            <div *ngIf="!task?.description" class="no-description bp-text-muted">
+              Sem descrição.
             </div>
           </div>
 
@@ -176,6 +160,12 @@ interface Task {
             <p>Esta tarefa não possui subtarefas.</p>
           </div>
         </div>
+
+        <div class="modal-footer" *ngIf="isDirty">
+          <button class="bp-btn bp-btn-primary" (click)="saveAllChanges()" [disabled]="isSaving">
+            {{ isSaving ? 'Salvando...' : '💾 Salvar Respostas' }}
+          </button>
+        </div>
       </div>
     </div>
 
@@ -256,6 +246,15 @@ interface Task {
       padding: 1.5rem;
       overflow-y: auto;
       flex: 1;
+    }
+
+    .modal-footer {
+      padding: 1rem 1.5rem;
+      border-top: 1px solid #e2e8f0;
+      background: #f7fafc;
+      border-radius: 0 0 12px 12px;
+      display: flex;
+      justify-content: flex-end;
     }
 
     .task-description {
@@ -409,9 +408,10 @@ export class TaskDetailModalComponent {
   tempSubtaskLinks: { [key: string]: string } = {};
 
   editingSubtaskLinks: Set<string> = new Set();
+  isDirty = false;
+  isSaving = false;
 
-  isEditingDescription = false;
-  tempDescription = '';
+  private confirmService = inject(ConfirmService);
 
   constructor(
     private http: HttpClient,
@@ -420,7 +420,16 @@ export class TaskDetailModalComponent {
 
   private gemUtils = inject(GemUtilsService);
 
-  close() {
+  async close() {
+    if (this.isDirty) {
+      const confirmed = await this.confirmService.confirm(
+        'Alterações não salvas',
+        'Você possui alterações não salvas em respostas ou links. Deseja sair mesmo assim?',
+        { type: 'warning', confirmText: 'Sair sem salvar', cancelText: 'Continuar editando' }
+      );
+      if (!confirmed) return;
+    }
+    this.isDirty = false; // Reset dirty for next open
     this.closed.emit();
   }
 
@@ -461,17 +470,8 @@ export class TaskDetailModalComponent {
   }
 
   async saveSubtaskAnswer(subtask: Subtask) {
-    if (!this.projectId || !subtask.id) return;
-
-    try {
-      await this.http.patch(`${environment.apiUrl}/projects/${this.projectId}/subtasks/${subtask.id}/answer`, {
-        answer: subtask.answer || ''
-      }).toPromise();
-      this.toast.success('Resposta salva!');
-    } catch (err) {
-      console.error('Failed to save answer:', err);
-      this.toast.error('Erro ao salvar resposta');
-    }
+    // Apenas marca como dirty, não salva imediatamente
+    this.isDirty = true;
   }
 
   getGemIcon(gemType: string) {
@@ -480,7 +480,7 @@ export class TaskDetailModalComponent {
 
   // Task Link Methods
   async saveTaskLink() {
-    if (!this.projectId || !this.task?.id || !this.tempTaskLink) {
+    if (!this.tempTaskLink) {
       this.toast.error('Link inválido');
       return;
     }
@@ -489,22 +489,12 @@ export class TaskDetailModalComponent {
       this.tempTaskLink = 'https://' + this.tempTaskLink;
     }
 
-    try {
-      await this.http.patch(`/api/projects/${this.projectId}/tasks/${this.task.id}/link`, {
-        link: this.tempTaskLink
-      }).toPromise();
-
-      if (this.task) {
-        this.task.link = this.tempTaskLink;
-      }
-      this.tempTaskLink = '';
-      this.showTaskLinkForm = false;
-      this.toast.success('Link adicionado à tarefa');
-      this.taskUpdated.emit();
-    } catch (err) {
-      console.error('Failed to save task link:', err);
-      this.toast.error('Erro ao salvar link');
+    if (this.task) {
+      this.task.link = this.tempTaskLink;
     }
+    this.tempTaskLink = '';
+    this.showTaskLinkForm = false;
+    this.isDirty = true;
   }
 
   cancelTaskLink() {
@@ -513,70 +503,54 @@ export class TaskDetailModalComponent {
   }
 
   async removeTaskLink() {
-    if (!this.projectId || !this.task?.id) return;
-
-    try {
-      await this.http.patch(`${environment.apiUrl}/projects/${this.projectId}/tasks/${this.task.id}/link`, {
-        link: null
-      }).toPromise();
-
-      if (this.task) {
-        this.task.link = undefined;
-      }
-      this.toast.success('Link removido');
-      this.taskUpdated.emit();
-    } catch (err) {
-      console.error('Failed to remove task link:', err);
-      this.toast.error('Erro ao remover link');
+    if (this.task) {
+      this.task.link = undefined;
     }
+    this.isDirty = true;
   }
 
-
-  // Description Methods
-  startEditingDescription() {
-    this.tempDescription = this.task?.description || '';
-    this.isEditingDescription = true;
-  }
-
-  cancelEditingDescription() {
-    this.isEditingDescription = false;
-    this.tempDescription = '';
-  }
-
-  async saveDescription() {
+  async saveAllChanges() {
     if (!this.projectId || !this.task?.id) return;
 
+    this.isSaving = true;
     try {
-      await this.http.patch(`${environment.apiUrl}/projects/${this.projectId}/tasks/${this.task.id}/description`, {
-        description: this.tempDescription
-      }).toPromise();
+      const promises: Promise<any>[] = [];
 
-      if (this.task) {
-        this.task.description = this.tempDescription;
-      }
-      this.isEditingDescription = false;
-      this.toast.success('Descrição atualizada!');
-      this.taskUpdated.emit();
-    } catch (err) {
-      console.error('Failed to save description:', err);
-      // Fallback: try updating the task itself if specific endpoint doesn't exist
-      try {
-        await this.http.patch(`${environment.apiUrl}/projects/${this.projectId}/tasks/${this.task.id}`, {
-          description: this.tempDescription
-        }).toPromise();
+      // Save task link
+      promises.push(
+        this.http.patch(`${environment.apiUrl}/projects/${this.projectId}/tasks/${this.task.id}/link`, {
+          link: this.task.link || null
+        }).toPromise()
+      );
 
-        if (this.task) {
-          this.task.description = this.tempDescription;
+      // Save all subtask answers and links
+      for (const subtask of this.task.subtasks) {
+        if (subtask.id) {
+          promises.push(
+            this.http.patch(`${environment.apiUrl}/projects/${this.projectId}/subtasks/${subtask.id}/answer`, {
+              answer: subtask.answer || ''
+            }).toPromise()
+          );
+          promises.push(
+            this.http.patch(`${environment.apiUrl}/projects/${this.projectId}/subtasks/${subtask.id}/link`, {
+              link: subtask.link || null
+            }).toPromise()
+          );
         }
-        this.isEditingDescription = false;
-        this.toast.success('Descrição atualizada!');
-        this.taskUpdated.emit();
-      } catch (err2) {
-        console.error('Failed to update task:', err2);
-        this.toast.error('Erro ao atualizar descrição');
       }
+
+      await Promise.all(promises);
+      this.isDirty = false;
+      this.toast.success('Alterações salvas com sucesso!');
+      this.taskUpdated.emit();
+    } catch (err) {
+      console.error('Failed to save changes:', err);
+      this.toast.error('Erro ao salvar alterações');
+    } finally {
+      this.isSaving = false;
     }
   }
+
 
   // Subtask Link Methods
   isEditingSubtaskLink(subtaskId: string): boolean {
@@ -594,8 +568,6 @@ export class TaskDetailModalComponent {
   }
 
   async saveSubtaskLink(subtask: Subtask) {
-    if (!this.projectId || !subtask.id) return;
-
     let link = this.tempSubtaskLinks[subtask.id];
     if (!link) {
       this.toast.error('Link inválido');
@@ -606,36 +578,14 @@ export class TaskDetailModalComponent {
       link = 'https://' + link;
     }
 
-    try {
-      await this.http.patch(`/api/projects/${this.projectId}/subtasks/${subtask.id}/link`, {
-        link: link
-      }).toPromise();
-
-      subtask.link = link;
-      delete this.tempSubtaskLinks[subtask.id];
-      this.editingSubtaskLinks.delete(subtask.id);
-      this.toast.success('Link adicionado à subtarefa');
-      this.taskUpdated.emit();
-    } catch (err) {
-      console.error('Failed to save subtask link:', err);
-      this.toast.error('Erro ao salvar link');
-    }
+    subtask.link = link;
+    delete this.tempSubtaskLinks[subtask.id];
+    this.editingSubtaskLinks.delete(subtask.id);
+    this.isDirty = true;
   }
 
   async removeSubtaskLink(subtask: Subtask) {
-    if (!this.projectId || !subtask.id) return;
-
-    try {
-      await this.http.patch(`${environment.apiUrl}/projects/${this.projectId}/subtasks/${subtask.id}/link`, {
-        link: null
-      }).toPromise();
-
-      subtask.link = undefined;
-      this.toast.success('Link removido');
-      this.taskUpdated.emit();
-    } catch (err) {
-      console.error('Failed to remove subtask link:', err);
-      this.toast.error('Erro ao remover link');
-    }
+    subtask.link = undefined;
+    this.isDirty = true;
   }
 }
