@@ -5,6 +5,7 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { ToastService } from '../../services/toast.service';
 import { ConfirmService } from '../../services/confirm.service';
+import { BreadcrumbComponent } from '../../components/breadcrumb.component';
 
 interface UserWithStats {
   id: string;
@@ -21,9 +22,10 @@ interface UserWithStats {
 @Component({
   selector: 'app-users-management',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, BreadcrumbComponent],
   template: `
     <div class="bp-container bp-py-lg">
+      <app-breadcrumb></app-breadcrumb>
       <!-- Header -->
       <div class="page-header">
         <div>
@@ -661,12 +663,12 @@ export class UsersManagementComponent implements OnInit {
   showModal = signal(false);
   editingUser = signal<UserWithStats | null>(null);
   searchTerm = '';
-  
+
   // Audit log
   showAuditModal = signal(false);
   auditUser = signal<UserWithStats | null>(null);
   auditLogs = signal<any[]>([]);
-  
+
   formData: any = {
     name: '',
     email: '',
@@ -680,7 +682,7 @@ export class UsersManagementComponent implements OnInit {
     private http: HttpClient,
     private toast: ToastService,
     private confirm: ConfirmService
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.loadUsers();
@@ -706,10 +708,10 @@ export class UsersManagementComponent implements OnInit {
     if (!this.searchTerm.trim()) {
       return this.users();
     }
-    
+
     const search = this.searchTerm.toLowerCase();
-    return this.users().filter(user => 
-      user.name.toLowerCase().includes(search) || 
+    return this.users().filter(user =>
+      user.name.toLowerCase().includes(search) ||
       user.email.toLowerCase().includes(search)
     );
   }
@@ -766,7 +768,7 @@ export class UsersManagementComponent implements OnInit {
   viewAuditLog(user: UserWithStats) {
     this.auditUser.set(user);
     this.showAuditModal.set(true);
-    
+
     // Load audit log
     this.http.get<any[]>(`${environment.apiUrl}/users/admin/${user.id}/audit-log`).subscribe({
       next: (logs) => {
@@ -840,9 +842,9 @@ export class UsersManagementComponent implements OnInit {
 
   formatAuditDetails(details: any): string {
     if (!details) return '';
-    
+
     const parts: string[] = [];
-    
+
     if (details.email) {
       parts.push(`Email: ${details.email}`);
     }
@@ -867,7 +869,7 @@ export class UsersManagementComponent implements OnInit {
     if (details.name && details.email) {
       parts.push(`Nome: ${details.name}, Email: ${details.email}`);
     }
-    
+
     return parts.join(' • ');
   }
 
@@ -904,7 +906,7 @@ export class UsersManagementComponent implements OnInit {
 
   saveUser() {
     const editing = this.editingUser();
-    
+
     if (!this.formData.name || !this.formData.email) {
       this.toast.error('Preencha todos os campos obrigatórios');
       return;
@@ -950,7 +952,7 @@ export class UsersManagementComponent implements OnInit {
   toggleUserAccess(user: UserWithStats) {
     const newStatus = !user.isActive;
     const title = newStatus ? 'Ativar Acesso' : 'Desativar Acesso';
-    const message = newStatus 
+    const message = newStatus
       ? `Deseja realmente ativar o acesso de ${user.name}?`
       : `O usuário ${user.name} não poderá mais fazer login.`;
 
