@@ -7,6 +7,7 @@ import { ToastService } from '../../services/toast.service';
 import { ConfirmService } from '../../services/confirm.service';
 import { environment } from '../../../environments/environment';
 import { RichTextEditorComponent } from '../../components/rich-text-editor.component';
+import { GemUtilsService } from '../../services/gem-utils.service';
 
 interface Subtask {
   id?: string;
@@ -26,6 +27,7 @@ interface Stage {
   name: string;
   description?: string;
   order: number;
+  gemType?: string;
   tasks: Task[];
 }
 
@@ -79,16 +81,22 @@ interface Project {
           <div *ngFor="let stage of project()!.projectStages; let si = index" 
                [id]="'stage-' + si"
                class="bp-card bp-mb-lg" 
-               style="border-left: 4px solid #4f46e5;">
+               [style.borderLeft]="'4px solid ' + gemUtils.getGemColor(stage.gemType || 'ESMERALDA')">
             <div class="bp-card-header" style="background: #f5f5ff;">
               <div class="bp-flex bp-justify-between bp-items-center bp-gap-md">
                 <div class="bp-flex bp-items-center bp-gap-sm" style="flex: 1;">
-                  <span style="font-size: 1.25rem;">📋</span>
+                  <div class="bp-flex bp-items-center bp-gap-xs" style="background: white; padding: 2px 8px; border-radius: 20px; border: 1px solid #e2e8f0;">
+                    <span [innerHTML]="gemUtils.getGemIcon(stage.gemType || 'ESMERALDA', 20)"></span>
+                    <select [(ngModel)]="stage.gemType" class="bp-input bp-input-sm" style="border: none; background: transparent; padding: 0; font-size: 0.75rem; width: auto; min-width: 100px;">
+                      <option *ngFor="let gem of gems" [value]="gem">{{ gemUtils.getGemName(gem) }}</option>
+                    </select>
+                  </div>
                   <input 
                     type="text" 
                     class="bp-input bp-input-sm" 
                     [(ngModel)]="stage.name"
-                    style="font-weight: bold; color: #4f46e5; background: transparent; border: none; padding: 4px; width: 100%;"
+                    [style.color]="gemUtils.getGemColor(stage.gemType || 'ESMERALDA')"
+                    style="font-weight: bold; background: transparent; border: none; padding: 4px; width: 100%;"
                     placeholder="Nome da Etapa"
                   />
                 </div>
@@ -128,7 +136,7 @@ interface Project {
                 </div>
               </div>
               <div class="bp-mt-md">
-                <label class="bp-label bp-text-sm" style="color: #4f46e5;">📝 Descrição da Etapa</label>
+                <label class="bp-label bp-text-sm" [style.color]="gemUtils.getGemColor(stage.gemType || 'ESMERALDA')">📝 Descrição da Etapa</label>
                 <app-rich-text-editor 
                   [(ngModel)]="stage.description" 
                   placeholder="Descreva o que deve ser feito nesta etapa"
@@ -244,12 +252,14 @@ export class ProjectManageComponent implements OnInit {
   private http = inject(HttpClient);
   private toast = inject(ToastService);
   private confirm = inject(ConfirmService);
+  public gemUtils = inject(GemUtilsService);
 
   projectId: string = '';
   project = signal<Project | null>(null);
   initialProjectStructure: Project | null = null;
   loading = signal(true);
   saving = signal(false);
+  gems = ['ESMERALDA', 'RUBI', 'SAFIRA', 'DIAMANTE'];
 
   ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id');
@@ -297,6 +307,7 @@ export class ProjectManageComponent implements OnInit {
       name: 'Nova Etapa',
       description: '',
       order: proj.projectStages.length,
+      gemType: 'ESMERALDA',
       tasks: []
     });
     this.project.set({ ...proj });
