@@ -6,6 +6,7 @@ import { HttpClient } from '@angular/common/http';
 import { ToastService } from '../../services/toast.service';
 import { ConfirmService } from '../../services/confirm.service';
 import { environment } from '../../../environments/environment';
+import { RichTextEditorComponent } from '../../components/rich-text-editor.component';
 
 interface Subtask {
   id?: string;
@@ -43,7 +44,7 @@ interface Project {
 @Component({
   selector: 'app-project-manage',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RichTextEditorComponent],
   template: `
     <div class="bp-page">
       <div class="bp-container">
@@ -77,17 +78,59 @@ interface Project {
           <!-- Stages -->
           <div *ngFor="let stage of project()!.projectStages; let si = index" class="bp-card bp-mb-lg" style="border-left: 4px solid #4f46e5;">
             <div class="bp-card-header" style="background: #f5f5ff;">
-              <div class="bp-flex bp-justify-between bp-items-center">
-                <h3 class="bp-card-title" style="color: #4f46e5;">📋 {{ stage.name }}</h3>
-                <button 
-                  type="button"
-                  class="bp-btn bp-btn-sm bp-btn-primary" 
-                  (click)="addTaskToStage(si)"
-                >
-                  + Adicionar Tarefa
-                </button>
+              <div class="bp-flex bp-justify-between bp-items-center bp-gap-md">
+                <div class="bp-flex bp-items-center bp-gap-sm" style="flex: 1;">
+                  <span style="font-size: 1.25rem;">📋</span>
+                  <input 
+                    type="text" 
+                    class="bp-input bp-input-sm" 
+                    [(ngModel)]="stage.name"
+                    style="font-weight: bold; color: #4f46e5; background: transparent; border: none; padding: 4px; width: 100%;"
+                    placeholder="Nome da Etapa"
+                  />
+                </div>
+                <div class="bp-flex bp-gap-sm">
+                  <button 
+                    type="button"
+                    class="bp-btn bp-btn-sm bp-btn-secondary" 
+                    (click)="moveStageUp(si)"
+                    [disabled]="si === 0"
+                    title="Mover para cima"
+                  >
+                    ↑
+                  </button>
+                  <button 
+                    type="button"
+                    class="bp-btn bp-btn-sm bp-btn-secondary" 
+                    (click)="moveStageDown(si)"
+                    [disabled]="si === project()!.projectStages.length - 1"
+                    title="Mover para baixo"
+                  >
+                    ↓
+                  </button>
+                  <button 
+                    type="button"
+                    class="bp-btn bp-btn-sm bp-btn-primary" 
+                    (click)="addTaskToStage(si)"
+                  >
+                    + Tarefa
+                  </button>
+                  <button 
+                    type="button"
+                    class="bp-btn bp-btn-sm bp-btn-error" 
+                    (click)="removeStage(si)"
+                  >
+                    ✕ Remover Etapa
+                  </button>
+                </div>
               </div>
-              <p class="bp-text-muted bp-text-sm" *ngIf="stage.description">{{ stage.description }}</p>
+              <div class="bp-mt-md">
+                <label class="bp-label bp-text-sm" style="color: #4f46e5;">📝 Descrição da Etapa</label>
+                <app-rich-text-editor 
+                  [(ngModel)]="stage.description" 
+                  placeholder="Descreva o que deve ser feito nesta etapa"
+                ></app-rich-text-editor>
+              </div>
             </div>
             <div class="bp-card-body">
               <!-- Tasks -->
@@ -117,12 +160,10 @@ interface Project {
 
                   <div class="bp-form-group">
                     <label class="bp-label">Descrição</label>
-                    <textarea 
-                      class="bp-input" 
+                    <app-rich-text-editor 
                       [(ngModel)]="task.description"
-                      rows="2"
                       placeholder="Descreva o que deve ser feito nesta tarefa"
-                    ></textarea>
+                    ></app-rich-text-editor>
                   </div>
 
                   <!-- Subtasks -->
@@ -163,6 +204,17 @@ interface Project {
             </div>
           </div>
 
+          <div class="bp-flex bp-justify-center bp-mb-2xl">
+            <button 
+              type="button"
+              class="bp-btn bp-btn-secondary" 
+              (click)="addStage()"
+              style="border-style: dashed; border-width: 2px;"
+            >
+              ➕ Adicionar Nova Etapa de Projeto
+            </button>
+          </div>
+
           <div class="bp-flex bp-gap-md bp-mt-2xl">
             <button 
               class="bp-btn bp-btn-primary"
@@ -192,6 +244,7 @@ export class ProjectManageComponent implements OnInit {
 
   projectId: string = '';
   project = signal<Project | null>(null);
+  initialProjectStructure: Project | null = null;
   loading = signal(true);
   saving = signal(false);
 
@@ -205,8 +258,11 @@ export class ProjectManageComponent implements OnInit {
 
   async loadProject(id: string) {
     try {
-      const data = await this.http.get<Project>(`${environment.apiUrl}/projects/${id}`).toPromise();
+      const data = await this.http.get<Project>(`${environment.apiUrl}/projects/${id}?t=${Date.now()}`).toPromise();
       this.project.set(data || null);
+      if (data) {
+        this.initialProjectStructure = JSON.parse(JSON.stringify(data));
+      }
     } catch (err) {
       console.error('Failed to load project:', err);
       this.toast.error('Erro ao carregar projeto');
@@ -219,7 +275,7 @@ export class ProjectManageComponent implements OnInit {
   addTaskToStage(stageIndex: number) {
     const proj = this.project();
     if (!proj) return;
-    
+
     const stage = proj.projectStages[stageIndex];
     stage.tasks.push({
       title: '',
@@ -230,16 +286,73 @@ export class ProjectManageComponent implements OnInit {
     this.project.set({ ...proj });
   }
 
+  addStage() {
+    const proj = this.project();
+    if (!proj) return;
+
+    proj.projectStages.push({
+      name: 'Nova Etapa',
+      description: '',
+      order: proj.projectStages.length,
+      tasks: []
+    });
+    this.project.set({ ...proj });
+  }
+
+  async removeStage(stageIndex: number) {
+    const proj = this.project();
+    if (!proj) return;
+
+    const confirmed = await this.confirm.confirm(
+      'Remover Etapa',
+      'Tem certeza que deseja remover esta etapa? Todos os dados preenchidos nela serão perdidos.',
+      { type: 'danger', confirmText: 'Sim, remover' }
+    );
+
+    if (confirmed) {
+      proj.projectStages.splice(stageIndex, 1);
+      // Reorder
+      proj.projectStages.forEach((s, i) => s.order = i);
+      this.project.set({ ...proj });
+    }
+  }
+
+  moveStageUp(index: number) {
+    const proj = this.project();
+    if (!proj || index === 0) return;
+
+    const stages = [...proj.projectStages];
+    [stages[index - 1], stages[index]] = [stages[index], stages[index - 1]];
+
+    // Update order property
+    stages.forEach((s, i) => s.order = i);
+
+    this.project.set({ ...proj, projectStages: stages });
+  }
+
+  moveStageDown(index: number) {
+    const proj = this.project();
+    if (!proj || index === proj.projectStages.length - 1) return;
+
+    const stages = [...proj.projectStages];
+    [stages[index], stages[index + 1]] = [stages[index + 1], stages[index]];
+
+    // Update order property
+    stages.forEach((s, i) => s.order = i);
+
+    this.project.set({ ...proj, projectStages: stages });
+  }
+
   async removeTaskFromStage(stageIndex: number, taskIndex: number) {
     const proj = this.project();
     if (!proj) return;
-    
+
     const confirmed = await this.confirm.confirm(
       'Remover Tarefa',
       'Tem certeza que deseja remover esta tarefa? Esta ação não pode ser desfeita.',
       { type: 'danger', confirmText: 'Sim, remover' }
     );
-    
+
     if (confirmed) {
       proj.projectStages[stageIndex].tasks.splice(taskIndex, 1);
       this.project.set({ ...proj });
@@ -249,7 +362,7 @@ export class ProjectManageComponent implements OnInit {
   addSubtaskToTask(stageIndex: number, taskIndex: number) {
     const proj = this.project();
     if (!proj) return;
-    
+
     proj.projectStages[stageIndex].tasks[taskIndex].subtasks.push({ description: '' });
     this.project.set({ ...proj });
   }
@@ -257,7 +370,7 @@ export class ProjectManageComponent implements OnInit {
   removeSubtask(stageIndex: number, taskIndex: number, subtaskIndex: number) {
     const proj = this.project();
     if (!proj) return;
-    
+
     proj.projectStages[stageIndex].tasks[taskIndex].subtasks.splice(subtaskIndex, 1);
     this.project.set({ ...proj });
   }
@@ -282,12 +395,28 @@ export class ProjectManageComponent implements OnInit {
       }
     }
 
+    // Identificar remoções para o resumo
+    const removals = this.getRemovalsSummary();
+    if (removals) {
+      const confirmed = await this.confirm.confirm(
+        'Confirmar Alterações',
+        `As seguintes informações serão removidas permanentemente:\n\n${removals}\n\nDeseja continuar?`,
+        { type: 'danger', confirmText: 'Sim, aplicar' }
+      );
+      if (!confirmed) return;
+    }
+
     this.saving.set(true);
     try {
       await this.http.put(`${environment.apiUrl}/projects/${this.projectId}/structure`, {
         stages: proj.projectStages
       }).toPromise();
+
+      // Update initial structure after success
+      this.initialProjectStructure = JSON.parse(JSON.stringify(proj));
+
       this.toast.success('Alterações salvas com sucesso!');
+      window.scrollTo(0, 0);
       this.router.navigate(['/projects', this.projectId]);
     } catch (err: any) {
       this.toast.error('Erro ao salvar: ' + (err.error?.message || 'Erro desconhecido'));
@@ -295,6 +424,47 @@ export class ProjectManageComponent implements OnInit {
     } finally {
       this.saving.set(false);
     }
+  }
+
+  private getRemovalsSummary(): string {
+    if (!this.initialProjectStructure || !this.project()) return '';
+
+    const initialStages = this.initialProjectStructure.projectStages;
+    const currentStages = this.project()!.projectStages;
+
+    const removalLines: string[] = [];
+
+    // Check for removals
+    for (const iStage of initialStages) {
+      const currentStage = currentStages.find(s => s.id === iStage.id);
+
+      if (!currentStage && iStage.id) {
+        // Stage was removed entirely
+        removalLines.push(`• Etapa: ${iStage.name}`);
+      } else if (currentStage) {
+        // Stage exists, check for removed tasks within it
+        for (const iTask of iStage.tasks) {
+          const currentTask = currentStage.tasks.find(t => t.id === iTask.id);
+
+          if (!currentTask && iTask.id) {
+            // Task was removed from an existing stage
+            removalLines.push(`• Etapa: ${iStage.name} ➔ Tarefa: ${iTask.title}`);
+          } else if (currentTask) {
+            // Task exists, check for removed subtasks within it
+            for (const iSub of iTask.subtasks) {
+              const currentSub = currentTask.subtasks.find(s => s.id === iSub.id);
+
+              if (!currentSub && iSub.id) {
+                // Subtask was removed from an existing task
+                removalLines.push(`• Etapa: ${iStage.name} ➔ Tarefa: ${iTask.title} ➔ Subtarefa: ${iSub.description}`);
+              }
+            }
+          }
+        }
+      }
+    }
+
+    return removalLines.join('\n');
   }
 
   goBack() {

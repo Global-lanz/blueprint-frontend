@@ -109,6 +109,7 @@ import { ConfirmService } from '../services/confirm.service';
     .bp-modal-body p {
       margin: 0;
       color: var(--bp-gray-900);
+      white-space: pre-wrap;
     }
 
     .bp-modal-footer {
