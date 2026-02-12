@@ -6,6 +6,7 @@ import { HttpClient } from '@angular/common/http';
 import { ToastService } from '../../services/toast.service';
 import { ConfirmService } from '../../services/confirm.service';
 import { environment } from '../../../environments/environment';
+import { RichTextEditorComponent } from '../../components/rich-text-editor.component';
 
 interface Subtask {
   id?: string;
@@ -43,7 +44,7 @@ interface Project {
 @Component({
   selector: 'app-project-manage',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RichTextEditorComponent],
   template: `
     <div class="bp-page">
       <div class="bp-container">
@@ -91,6 +92,24 @@ interface Project {
                 <div class="bp-flex bp-gap-sm">
                   <button 
                     type="button"
+                    class="bp-btn bp-btn-sm bp-btn-secondary" 
+                    (click)="moveStageUp(si)"
+                    [disabled]="si === 0"
+                    title="Mover para cima"
+                  >
+                    ↑
+                  </button>
+                  <button 
+                    type="button"
+                    class="bp-btn bp-btn-sm bp-btn-secondary" 
+                    (click)="moveStageDown(si)"
+                    [disabled]="si === project()!.projectStages.length - 1"
+                    title="Mover para baixo"
+                  >
+                    ↓
+                  </button>
+                  <button 
+                    type="button"
                     class="bp-btn bp-btn-sm bp-btn-primary" 
                     (click)="addTaskToStage(si)"
                   >
@@ -105,7 +124,13 @@ interface Project {
                   </button>
                 </div>
               </div>
-              <p class="bp-text-muted bp-text-sm bp-mt-sm" *ngIf="stage.description">{{ stage.description }}</p>
+              <div class="bp-mt-md">
+                <label class="bp-label bp-text-sm" style="color: #4f46e5;">📝 Descrição da Etapa</label>
+                <app-rich-text-editor 
+                  [(ngModel)]="stage.description" 
+                  placeholder="Descreva o que deve ser feito nesta etapa"
+                ></app-rich-text-editor>
+              </div>
             </div>
             <div class="bp-card-body">
               <!-- Tasks -->
@@ -135,12 +160,10 @@ interface Project {
 
                   <div class="bp-form-group">
                     <label class="bp-label">Descrição</label>
-                    <textarea 
-                      class="bp-input" 
+                    <app-rich-text-editor 
                       [(ngModel)]="task.description"
-                      rows="2"
                       placeholder="Descreva o que deve ser feito nesta tarefa"
-                    ></textarea>
+                    ></app-rich-text-editor>
                   </div>
 
                   <!-- Subtasks -->
@@ -235,7 +258,7 @@ export class ProjectManageComponent implements OnInit {
 
   async loadProject(id: string) {
     try {
-      const data = await this.http.get<Project>(`${environment.apiUrl}/projects/${id}`).toPromise();
+      const data = await this.http.get<Project>(`${environment.apiUrl}/projects/${id}?t=${Date.now()}`).toPromise();
       this.project.set(data || null);
       if (data) {
         this.initialProjectStructure = JSON.parse(JSON.stringify(data));
@@ -292,6 +315,32 @@ export class ProjectManageComponent implements OnInit {
       proj.projectStages.forEach((s, i) => s.order = i);
       this.project.set({ ...proj });
     }
+  }
+
+  moveStageUp(index: number) {
+    const proj = this.project();
+    if (!proj || index === 0) return;
+
+    const stages = [...proj.projectStages];
+    [stages[index - 1], stages[index]] = [stages[index], stages[index - 1]];
+
+    // Update order property
+    stages.forEach((s, i) => s.order = i);
+
+    this.project.set({ ...proj, projectStages: stages });
+  }
+
+  moveStageDown(index: number) {
+    const proj = this.project();
+    if (!proj || index === proj.projectStages.length - 1) return;
+
+    const stages = [...proj.projectStages];
+    [stages[index], stages[index + 1]] = [stages[index + 1], stages[index]];
+
+    // Update order property
+    stages.forEach((s, i) => s.order = i);
+
+    this.project.set({ ...proj, projectStages: stages });
   }
 
   async removeTaskFromStage(stageIndex: number, taskIndex: number) {
@@ -367,6 +416,7 @@ export class ProjectManageComponent implements OnInit {
       this.initialProjectStructure = JSON.parse(JSON.stringify(proj));
 
       this.toast.success('Alterações salvas com sucesso!');
+      window.scrollTo(0, 0);
       this.router.navigate(['/projects', this.projectId]);
     } catch (err: any) {
       this.toast.error('Erro ao salvar: ' + (err.error?.message || 'Erro desconhecido'));

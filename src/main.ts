@@ -1,5 +1,5 @@
 import { bootstrapApplication } from '@angular/platform-browser';
-import { provideRouter } from '@angular/router';
+import { provideRouter, withInMemoryScrolling } from '@angular/router';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { HTTP_INTERCEPTORS, HttpClient } from '@angular/common/http';
 import { APP_INITIALIZER, importProvidersFrom } from '@angular/core';
@@ -42,7 +42,7 @@ bootstrapApplication(AppComponent, {
       { path: 'admin/users', loadComponent: () => import('./app/pages/admin/users-management.component').then(c => c.UsersManagementComponent), canActivate: [adminGuard] },
       { path: 'admin/settings', loadComponent: () => import('./app/pages/admin/settings.component').then(c => c.SettingsComponent), canActivate: [adminGuard] },
       { path: 'tasks', loadComponent: () => import('./app/tasks/tasks.component').then(c => c.TasksComponent), canActivate: [authGuard] }
-    ]),
+    ], withInMemoryScrolling({ scrollPositionRestoration: 'enabled' })),
     provideHttpClient(withInterceptorsFromDi()),
     ...storeProviders,
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
