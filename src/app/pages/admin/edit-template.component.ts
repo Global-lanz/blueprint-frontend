@@ -6,6 +6,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { ToastService } from '../../services/toast.service';
 import { BreadcrumbComponent } from '../../components/breadcrumb.component';
+import { RichTextEditorComponent } from '../../components/rich-text-editor.component';
 import { environment } from '../../../environments/environment';
 
 interface Subtask {
@@ -41,7 +42,7 @@ interface TemplateForm {
   selector: 'app-edit-template',
   templateUrl: './edit-template.component.html',
   standalone: true,
-  imports: [CommonModule, FormsModule, BreadcrumbComponent],
+  imports: [CommonModule, FormsModule, BreadcrumbComponent, RichTextEditorComponent],
 })
 export class EditTemplateComponent implements OnInit {
   private route = inject(ActivatedRoute);
@@ -54,8 +55,10 @@ export class EditTemplateComponent implements OnInit {
   loading = signal(true);
   saving = signal(false);
   expandedStages = signal<Set<number>>(new Set());
+  expandedTasks = signal<Map<string, Set<number>>>(new Map()); // stageIndex -> Set of taskIndices
+  expandedSubtasks = signal<Map<string, Set<number>>>(new Map()); // stageIndex-taskIndex -> Set of subtaskIndices
   isActive = signal(true);
-  
+
   templateForm: TemplateForm = {
     name: '',
     description: '',
@@ -109,10 +112,9 @@ export class EditTemplateComponent implements OnInit {
           }))
         }))
       };
-      
-      // Auto-expand all stages when loading
-      const allIndices = new Set(this.templateForm.stages.map((_, index) => index));
-      this.expandedStages.set(allIndices);
+
+      // Stages collapsed by default (empty set)
+      this.expandedStages.set(new Set());
     } catch (err) {
       console.error('Failed to load template:', err);
       this.toast.error('Erro ao carregar template');
@@ -137,6 +139,24 @@ export class EditTemplateComponent implements OnInit {
     this.expandedStages.set(new Set(expanded));
   }
 
+  duplicateStage(index: number) {
+    const stage = this.templateForm.stages[index];
+    const newStage: Stage = {
+      name: stage.name + ' (Cópia)',
+      description: stage.description,
+      order: this.templateForm.stages.length,
+      gemType: stage.gemType,
+      tasks: stage.tasks.map(task => ({
+        title: task.title,
+        description: task.description,
+        order: task.order,
+        subtasks: task.subtasks.map(st => ({ description: st.description }))
+      }))
+    };
+    this.templateForm.stages.push(newStage);
+    this.toast.success('Etapa duplicada com sucesso!');
+  }
+
   toggleStage(index: number) {
     const expanded = this.expandedStages();
     if (expanded.has(index)) {
@@ -159,12 +179,50 @@ export class EditTemplateComponent implements OnInit {
 
   addTaskToStage(stageIndex: number) {
     const stage = this.templateForm.stages[stageIndex];
+    const newTaskIndex = stage.tasks.length;
     stage.tasks.push({
       title: '',
       description: '',
-      order: stage.tasks.length,
+      order: newTaskIndex,
       subtasks: []
     });
+    // Auto-expand new task
+    this.toggleTask(stageIndex, newTaskIndex, true);
+  }
+
+  duplicateTask(stageIndex: number, taskIndex: number) {
+    const task = this.templateForm.stages[stageIndex].tasks[taskIndex];
+    const newTask: Task = {
+      title: task.title + ' (Cópia)',
+      description: task.description,
+      order: this.templateForm.stages[stageIndex].tasks.length,
+      subtasks: task.subtasks.map(st => ({ description: st.description }))
+    };
+    this.templateForm.stages[stageIndex].tasks.push(newTask);
+    this.toast.success('Tarefa duplicada com sucesso!');
+  }
+
+  toggleTask(stageIndex: number, taskIndex: number, forceExpand = false) {
+    const key = `${stageIndex}`;
+    const expanded = this.expandedTasks();
+    const taskSet = expanded.get(key) || new Set<number>();
+
+    if (forceExpand) {
+      taskSet.add(taskIndex);
+    } else if (taskSet.has(taskIndex)) {
+      taskSet.delete(taskIndex);
+    } else {
+      taskSet.add(taskIndex);
+    }
+
+    expanded.set(key, taskSet);
+    this.expandedTasks.set(new Map(expanded));
+  }
+
+  isTaskExpanded(stageIndex: number, taskIndex: number): boolean {
+    const key = `${stageIndex}`;
+    const taskSet = this.expandedTasks().get(key);
+    return taskSet ? taskSet.has(taskIndex) : false;
   }
 
   removeTaskFromStage(stageIndex: number, taskIndex: number) {
@@ -232,7 +290,7 @@ export class EditTemplateComponent implements OnInit {
 
   async toggleActive() {
     if (!this.templateId) return;
-    
+
     const action = this.isActive() ? 'desativar' : 'ativar';
     const actionPast = this.isActive() ? 'desativado' : 'ativado';
 
@@ -241,7 +299,7 @@ export class EditTemplateComponent implements OnInit {
         `${environment.apiUrl}/templates/${this.templateId}/toggle-active`,
         {}
       ).toPromise();
-      
+
       this.isActive.set(updated.isActive);
       this.toast.success(`Template ${actionPast} com sucesso!`);
     } catch (err: any) {

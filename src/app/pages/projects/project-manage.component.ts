@@ -77,17 +77,35 @@ interface Project {
           <!-- Stages -->
           <div *ngFor="let stage of project()!.projectStages; let si = index" class="bp-card bp-mb-lg" style="border-left: 4px solid #4f46e5;">
             <div class="bp-card-header" style="background: #f5f5ff;">
-              <div class="bp-flex bp-justify-between bp-items-center">
-                <h3 class="bp-card-title" style="color: #4f46e5;">📋 {{ stage.name }}</h3>
-                <button 
-                  type="button"
-                  class="bp-btn bp-btn-sm bp-btn-primary" 
-                  (click)="addTaskToStage(si)"
-                >
-                  + Adicionar Tarefa
-                </button>
+              <div class="bp-flex bp-justify-between bp-items-center bp-gap-md">
+                <div class="bp-flex bp-items-center bp-gap-sm" style="flex: 1;">
+                  <span style="font-size: 1.25rem;">📋</span>
+                  <input 
+                    type="text" 
+                    class="bp-input bp-input-sm" 
+                    [(ngModel)]="stage.name"
+                    style="font-weight: bold; color: #4f46e5; background: transparent; border: none; padding: 4px; width: 100%;"
+                    placeholder="Nome da Etapa"
+                  />
+                </div>
+                <div class="bp-flex bp-gap-sm">
+                  <button 
+                    type="button"
+                    class="bp-btn bp-btn-sm bp-btn-primary" 
+                    (click)="addTaskToStage(si)"
+                  >
+                    + Tarefa
+                  </button>
+                  <button 
+                    type="button"
+                    class="bp-btn bp-btn-sm bp-btn-error" 
+                    (click)="removeStage(si)"
+                  >
+                    ✕ Remover Etapa
+                  </button>
+                </div>
               </div>
-              <p class="bp-text-muted bp-text-sm" *ngIf="stage.description">{{ stage.description }}</p>
+              <p class="bp-text-muted bp-text-sm bp-mt-sm" *ngIf="stage.description">{{ stage.description }}</p>
             </div>
             <div class="bp-card-body">
               <!-- Tasks -->
@@ -163,6 +181,17 @@ interface Project {
             </div>
           </div>
 
+          <div class="bp-flex bp-justify-center bp-mb-2xl">
+            <button 
+              type="button"
+              class="bp-btn bp-btn-secondary" 
+              (click)="addStage()"
+              style="border-style: dashed; border-width: 2px;"
+            >
+              ➕ Adicionar Nova Etapa de Projeto
+            </button>
+          </div>
+
           <div class="bp-flex bp-gap-md bp-mt-2xl">
             <button 
               class="bp-btn bp-btn-primary"
@@ -192,6 +221,7 @@ export class ProjectManageComponent implements OnInit {
 
   projectId: string = '';
   project = signal<Project | null>(null);
+  initialProjectStructure: Project | null = null;
   loading = signal(true);
   saving = signal(false);
 
@@ -207,6 +237,9 @@ export class ProjectManageComponent implements OnInit {
     try {
       const data = await this.http.get<Project>(`${environment.apiUrl}/projects/${id}`).toPromise();
       this.project.set(data || null);
+      if (data) {
+        this.initialProjectStructure = JSON.parse(JSON.stringify(data));
+      }
     } catch (err) {
       console.error('Failed to load project:', err);
       this.toast.error('Erro ao carregar projeto');
@@ -219,7 +252,7 @@ export class ProjectManageComponent implements OnInit {
   addTaskToStage(stageIndex: number) {
     const proj = this.project();
     if (!proj) return;
-    
+
     const stage = proj.projectStages[stageIndex];
     stage.tasks.push({
       title: '',
@@ -230,16 +263,47 @@ export class ProjectManageComponent implements OnInit {
     this.project.set({ ...proj });
   }
 
+  addStage() {
+    const proj = this.project();
+    if (!proj) return;
+
+    proj.projectStages.push({
+      name: 'Nova Etapa',
+      description: '',
+      order: proj.projectStages.length,
+      tasks: []
+    });
+    this.project.set({ ...proj });
+  }
+
+  async removeStage(stageIndex: number) {
+    const proj = this.project();
+    if (!proj) return;
+
+    const confirmed = await this.confirm.confirm(
+      'Remover Etapa',
+      'Tem certeza que deseja remover esta etapa? Todos os dados preenchidos nela serão perdidos.',
+      { type: 'danger', confirmText: 'Sim, remover' }
+    );
+
+    if (confirmed) {
+      proj.projectStages.splice(stageIndex, 1);
+      // Reorder
+      proj.projectStages.forEach((s, i) => s.order = i);
+      this.project.set({ ...proj });
+    }
+  }
+
   async removeTaskFromStage(stageIndex: number, taskIndex: number) {
     const proj = this.project();
     if (!proj) return;
-    
+
     const confirmed = await this.confirm.confirm(
       'Remover Tarefa',
       'Tem certeza que deseja remover esta tarefa? Esta ação não pode ser desfeita.',
       { type: 'danger', confirmText: 'Sim, remover' }
     );
-    
+
     if (confirmed) {
       proj.projectStages[stageIndex].tasks.splice(taskIndex, 1);
       this.project.set({ ...proj });
@@ -249,7 +313,7 @@ export class ProjectManageComponent implements OnInit {
   addSubtaskToTask(stageIndex: number, taskIndex: number) {
     const proj = this.project();
     if (!proj) return;
-    
+
     proj.projectStages[stageIndex].tasks[taskIndex].subtasks.push({ description: '' });
     this.project.set({ ...proj });
   }
@@ -257,7 +321,7 @@ export class ProjectManageComponent implements OnInit {
   removeSubtask(stageIndex: number, taskIndex: number, subtaskIndex: number) {
     const proj = this.project();
     if (!proj) return;
-    
+
     proj.projectStages[stageIndex].tasks[taskIndex].subtasks.splice(subtaskIndex, 1);
     this.project.set({ ...proj });
   }
@@ -282,11 +346,26 @@ export class ProjectManageComponent implements OnInit {
       }
     }
 
+    // Identificar remoções para o resumo
+    const removals = this.getRemovalsSummary();
+    if (removals) {
+      const confirmed = await this.confirm.confirm(
+        'Confirmar Alterações',
+        `As seguintes informações serão removidas permanentemente:\n\n${removals}\n\nDeseja continuar?`,
+        { type: 'danger', confirmText: 'Sim, aplicar' }
+      );
+      if (!confirmed) return;
+    }
+
     this.saving.set(true);
     try {
       await this.http.put(`${environment.apiUrl}/projects/${this.projectId}/structure`, {
         stages: proj.projectStages
       }).toPromise();
+
+      // Update initial structure after success
+      this.initialProjectStructure = JSON.parse(JSON.stringify(proj));
+
       this.toast.success('Alterações salvas com sucesso!');
       this.router.navigate(['/projects', this.projectId]);
     } catch (err: any) {
@@ -295,6 +374,48 @@ export class ProjectManageComponent implements OnInit {
     } finally {
       this.saving.set(false);
     }
+  }
+
+  private getRemovalsSummary(): string {
+    if (!this.initialProjectStructure || !this.project()) return '';
+
+    const initialStages = this.initialProjectStructure.projectStages;
+    const currentStages = this.project()!.projectStages;
+
+    const removedStageNames: string[] = [];
+    const removedTaskTitles: string[] = [];
+    const removedSubtaskDescs: string[] = [];
+
+    // Check for removed stages
+    for (const iStage of initialStages) {
+      const currentStage = currentStages.find(s => s.id === iStage.id);
+      if (!currentStage && iStage.id) {
+        removedStageNames.push(`Etapa: ${iStage.name}`);
+      } else if (currentStage) {
+        // Check for removed tasks in this stage
+        for (const iTask of iStage.tasks) {
+          const currentTask = currentStage.tasks.find(t => t.id === iTask.id);
+          if (!currentTask && iTask.id) {
+            removedTaskTitles.push(`Tarefa: ${iTask.title} (da etapa ${iStage.name})`);
+          } else if (currentTask) {
+            // Check for removed subtasks in this task
+            for (const iSub of iTask.subtasks) {
+              const currentSub = currentTask.subtasks.find(s => s.id === iSub.id);
+              if (!currentSub && iSub.id) {
+                removedSubtaskDescs.push(`Subtarefa: ${iSub.description} (da tarefa ${iTask.title})`);
+              }
+            }
+          }
+        }
+      }
+    }
+
+    let summary = '';
+    if (removedStageNames.length > 0) summary += '• ' + removedStageNames.join('\n• ') + '\n';
+    if (removedTaskTitles.length > 0) summary += '• ' + removedTaskTitles.join('\n• ') + '\n';
+    if (removedSubtaskDescs.length > 0) summary += '• ' + removedSubtaskDescs.join('\n• ') + '\n';
+
+    return summary.trim();
   }
 
   goBack() {
