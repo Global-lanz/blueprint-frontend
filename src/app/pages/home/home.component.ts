@@ -10,6 +10,7 @@ import { ToastService } from '../../services/toast.service';
 import { BreadcrumbComponent } from '../../components/breadcrumb.component';
 import { TaskDetailModalComponent } from '../../components/task-detail-modal.component';
 import { ProjectsTableComponent } from '../../components/projects-table.component';
+import { HtmlRendererComponent } from '../../components/html-renderer.component';
 import { environment } from '../../../environments/environment';
 
 interface Subtask {
@@ -48,7 +49,7 @@ interface ProjectItem {
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, RouterModule, BreadcrumbComponent, TaskDetailModalComponent, ProjectsTableComponent],
+  imports: [CommonModule, RouterModule, BreadcrumbComponent, TaskDetailModalComponent, ProjectsTableComponent, HtmlRendererComponent],
   template: `
     <div class="bp-page">
       <div class="bp-container">
@@ -135,7 +136,7 @@ interface ProjectItem {
                     (click)="openTaskModal(task)"
                   >
                     <h5 class="kanban-task-title">{{ task.title }}</h5>
-                    <p class="kanban-task-description" *ngIf="task.description">{{ task.description }}</p>
+
                     <div class="kanban-task-footer">
                       <span class="bp-badge bp-text-sm" [style.background-color]="getProjectColor(task.projectId)" style="color: white;">{{ task.projectName }}</span>
                       <span class="bp-badge bp-badge-success bp-text-sm" *ngIf="task.stageName">
@@ -160,7 +161,7 @@ interface ProjectItem {
                     (click)="openTaskModal(task)"
                   >
                     <h5 class="kanban-task-title">{{ task.title }}</h5>
-                    <p class="kanban-task-description" *ngIf="task.description">{{ task.description }}</p>
+
                     <div class="kanban-task-footer">
                       <span class="bp-badge bp-text-sm" [style.background-color]="getProjectColor(task.projectId)" style="color: white;">{{ task.projectName }}</span>
                       <span class="bp-badge bp-badge-secondary bp-text-sm" *ngIf="task.stageName">
@@ -185,7 +186,7 @@ interface ProjectItem {
                     (click)="openTaskModal(task)"
                   >
                     <h5 class="kanban-task-title">{{ task.title }}</h5>
-                    <p class="kanban-task-description" *ngIf="task.description">{{ task.description }}</p>
+
                     <div class="kanban-task-footer">
                       <span class="bp-badge bp-text-sm" [style.background-color]="getProjectColor(task.projectId)" style="color: white;">{{ task.projectName }}</span>
                       <span class="bp-badge bp-badge-secondary bp-text-sm" *ngIf="task.stageName">
@@ -355,7 +356,7 @@ export class HomeComponent implements OnInit {
     this.projectsService.getAll().subscribe({
       next: (projects) => {
         const allTasks: Task[] = [];
-        
+
         projects.forEach(project => {
           // Tasks from stages
           project.stages?.forEach((stage: any) => {
@@ -390,7 +391,7 @@ export class HomeComponent implements OnInit {
             });
           });
         });
-        
+
         this.tasks.set(allTasks);
         this.loadingTasks.set(false);
       },
@@ -433,13 +434,13 @@ export class HomeComponent implements OnInit {
       '#84CC16', // Lime
       '#F97316'  // Orange
     ];
-    
+
     // Generate a hash from the project ID
     let hash = 0;
     for (let i = 0; i < projectId.length; i++) {
       hash = projectId.charCodeAt(i) + ((hash << 5) - hash);
     }
-    
+
     // Use the hash to pick a color
     const index = Math.abs(hash) % colors.length;
     return colors[index];
