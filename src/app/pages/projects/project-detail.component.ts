@@ -490,7 +490,7 @@ style="border: 2px solid #667eea; font-size: 0.8rem; padding: 0.25rem;"
           <line x1="12" y1="16" x2="12" y2="12"></line>
           <line x1="12" y1="8" x2="12.01" y2="8"></line>
         </svg>
-        <span class="bp-tooltip-text">Esta é a data em que você começou a trabalhar neste projeto de fato. Ela substituirá a data de criação nas listagens.</span>
+        <span class="bp-tooltip-text">Esta é a data em que você começou a trabalhar neste projeto de fato.</span>
       </span>
     </label>
     <div (click)="startEditingField('actualStartDate')" style="cursor: pointer;">
