@@ -17,7 +17,7 @@
       <div class="bp-flex bp-gap-sm bp-items-center">
         <button class="bp-btn bp-btn-sm" [class.bp-btn-secondary]="!showInactive()"
           [class.bp-btn-primary]="showInactive()" (click)="toggleFilter()">
-          {{ showInactive() ? '✓ Mostrar Inativos' : 'Apenas Ativos' }}
+          {{ showInactive() ? 'Apenas Ativos' : 'Mostrar inativos' }}
         </button>
         <button *ngIf="showInactive()" class="bp-btn bp-btn-sm bp-btn-ghost" (click)="clearFilters()">
           Limpar Filtros

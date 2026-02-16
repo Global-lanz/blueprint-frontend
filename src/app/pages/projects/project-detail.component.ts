@@ -483,9 +483,13 @@ style="border: 2px solid #667eea; font-size: 0.8rem; padding: 0.25rem;"
   <!-- Actual Start Date -->
   <div class="detail-item">
     <label class="detail-label">
-      🚀 Data de Início Real
+      📅 Data de inicio do projeto
       <span class="bp-tooltip">
-        <span style="font-size: 0.75rem;">(i)</span>
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-left: 4px; color: var(--bp-gray-400);">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="16" x2="12" y2="12"></line>
+          <line x1="12" y1="8" x2="12.01" y2="8"></line>
+        </svg>
         <span class="bp-tooltip-text">Esta é a data em que você começou a trabalhar neste projeto de fato. Ela substituirá a data de criação nas listagens.</span>
       </span>
     </label>

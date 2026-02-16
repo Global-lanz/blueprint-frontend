@@ -25,11 +25,11 @@ interface Project {
     <table class="bp-table">
       <thead>
         <tr>
-          <th>Nome do Projeto</th>
-          <th>Template</th>
-          <th>Criado em</th>
-          <th>Progresso</th>
-          <th>Ações</th>
+          <th class="bp-table-header">Nome do Projeto</th>
+          <th class="bp-table-header">Template</th>
+          <th class="bp-table-header">Iniciado em</th>
+          <th class="bp-table-header">Progresso</th>
+          <th class="bp-table-header">Ações</th>
         </tr>
       </thead>
       <tbody>
