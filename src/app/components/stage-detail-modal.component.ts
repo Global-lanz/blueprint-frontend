@@ -3,9 +3,11 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { ToastService } from '../services/toast.service';
+import { ConfirmService } from '../services/confirm.service';
 import { GemAchievementModalComponent } from './gem-achievement-modal.component';
 import { GemUtilsService } from '../services/gem-utils.service';
 import { TaskCardComponent } from './task-card.component';
+import { HtmlRendererComponent } from './html-renderer.component';
 import { environment } from '../../environments/environment';
 
 interface Subtask {
@@ -38,7 +40,7 @@ interface Stage {
 @Component({
   selector: 'app-stage-detail-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule, GemAchievementModalComponent, TaskCardComponent],
+  imports: [CommonModule, FormsModule, GemAchievementModalComponent, TaskCardComponent, HtmlRendererComponent],
   template: `
     <div class="modal-overlay" *ngIf="isOpen" (click)="close()">
       <div class="modal-content" (click)="$event.stopPropagation()">
@@ -49,7 +51,7 @@ interface Stage {
               <h3 class="modal-title">{{ stage?.name }}</h3>
             </div>
             <div class="stage-meta">
-              <span class="stage-badge">Etapa {{ stage?.order }}</span>
+              <!-- Badge removed -->
             </div>
           </div>
           <button class="modal-close" (click)="close()" title="Fechar">
@@ -60,7 +62,7 @@ interface Stage {
         <div class="modal-body">
           <!-- Stage Description -->
           <div class="stage-description" *ngIf="stage?.description">
-            <p>{{ stage.description }}</p>
+            <app-html-renderer [content]="stage.description"></app-html-renderer>
           </div>
 
           <!-- Progress Overview -->
@@ -91,6 +93,7 @@ interface Stage {
               [showHeader]="true"
               [showProgress]="true"
               (taskUpdated)="onTaskUpdated()"
+              (taskChanged)="onTaskChanged()"
             ></app-task-card>
           </div>
 
@@ -99,9 +102,9 @@ interface Stage {
           </div>
         </div>
 
-        <div class="modal-footer">
-          <button class="btn-save" (click)="saveAllAnswers()">
-            💾 Salvar Respostas
+        <div class="modal-footer" *ngIf="isDirty">
+          <button class="btn-save" (click)="saveAllAnswers()" [disabled]="isSaving">
+            {{ isSaving ? 'Salvando...' : '💾 Salvar Respostas' }}
           </button>
         </div>
       </div>
@@ -494,15 +497,28 @@ export class StageDetailModalComponent {
 
   showGemModal = false;
   newGemType: string | null = null;
+  isDirty = false;
+  isSaving = false;
+
+  private confirmService = inject(ConfirmService);
 
   constructor(
     private http: HttpClient,
     private toast: ToastService
-  ) {}
+  ) { }
 
   private gemUtils = inject(GemUtilsService);
 
-  close() {
+  async close() {
+    if (this.isDirty) {
+      const confirmed = await this.confirmService.confirm(
+        'Alterações não salvas',
+        'Você possui alterações não salvas em respostas ou links. Deseja sair mesmo assim?',
+        { type: 'warning', confirmText: 'Sair sem salvar', cancelText: 'Continuar editando' }
+      );
+      if (!confirmed) return;
+    }
+    this.isDirty = false;
     this.closed.emit();
   }
 
@@ -533,24 +549,28 @@ export class StageDetailModalComponent {
     this.stageUpdated.emit();
   }
 
+  onTaskChanged() {
+    this.isDirty = true;
+  }
+
   async toggleSubtask(subtask: Subtask) {
     if (!this.projectId || !subtask.id) return;
 
     try {
       const response: any = await this.http.patch(`${environment.apiUrl}/projects/${this.projectId}/subtasks/${subtask.id}/toggle`, {}).toPromise();
       subtask.completed = !subtask.completed;
-      
+
       // Recalcular se a tarefa está completa
       this.updateTaskCompletion();
-      
+
       this.toast.success(subtask.completed ? 'Subtarefa concluída!' : 'Subtarefa reaberta');
-      
+
       // Verificar se houve mudança de insígnia
       if (response?.gemChange?.changed && response.gemChange.newGem) {
         this.newGemType = response.gemChange.newGem;
         this.showGemModal = true;
       }
-      
+
       this.stageUpdated.emit();
     } catch (err) {
       console.error('Failed to toggle subtask:', err);
@@ -560,7 +580,7 @@ export class StageDetailModalComponent {
 
   updateTaskCompletion() {
     if (!this.stage?.tasks) return;
-    
+
     // Atualizar o status de conclusão de cada tarefa baseado nas subtarefas
     this.stage.tasks.forEach(task => {
       if (task.subtasks && task.subtasks.length > 0) {
@@ -573,16 +593,31 @@ export class StageDetailModalComponent {
   async saveAllAnswers() {
     if (!this.projectId || !this.stage?.tasks) return;
 
+    this.isSaving = true;
     try {
       const promises: Promise<any>[] = [];
-      
-      // Coletar todas as subtarefas de todas as tarefas
+
+      // Coletar todas as subtarefas e tarefas
       for (const task of this.stage.tasks) {
+        // Save task link
+        promises.push(
+          this.http.patch(`${environment.apiUrl}/projects/${this.projectId}/tasks/${task.id}/link`, {
+            link: task.link || null
+          }).toPromise()
+        );
+
         for (const subtask of task.subtasks || []) {
           if (subtask.id) {
+            // Save subtask answer
             promises.push(
               this.http.patch(`${environment.apiUrl}/projects/${this.projectId}/subtasks/${subtask.id}/answer`, {
                 answer: subtask.answer || ''
+              }).toPromise()
+            );
+            // Save subtask link
+            promises.push(
+              this.http.patch(`${environment.apiUrl}/projects/${this.projectId}/subtasks/${subtask.id}/link`, {
+                link: subtask.link || null
               }).toPromise()
             );
           }
@@ -590,10 +625,14 @@ export class StageDetailModalComponent {
       }
 
       await Promise.all(promises);
-      this.toast.success('Todas as respostas foram salvas!');
+      this.isDirty = false;
+      this.toast.success('Todas as respostas e links foram salvos!');
+      this.stageUpdated.emit();
     } catch (err) {
       console.error('Failed to save answers:', err);
       this.toast.error('Erro ao salvar respostas');
+    } finally {
+      this.isSaving = false;
     }
   }
 }

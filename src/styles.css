@@ -553,3 +553,35 @@ p {
   outline: 2px solid var(--bp-primary-light);
   outline-offset: 2px;
 }
+
+/* Tooltip */
+.bp-tooltip {
+  position: relative;
+  display: inline-block;
+  cursor: help;
+}
+
+.bp-tooltip .bp-tooltip-text {
+  visibility: hidden;
+  width: 200px;
+  background-color: #333;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px;
+  position: absolute;
+  z-index: 10;
+  bottom: 125%;
+  left: 50%;
+  margin-left: -100px;
+  opacity: 0;
+  transition: opacity 0.3s;
+  font-size: 0.75rem;
+  font-weight: normal;
+  line-height: 1.2;
+}
+
+.bp-tooltip:hover .bp-tooltip-text {
+  visibility: visible;
+  opacity: 1;
+}

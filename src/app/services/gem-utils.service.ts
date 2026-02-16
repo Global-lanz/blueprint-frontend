@@ -33,7 +33,7 @@ export class GemUtilsService {
     'DIAMANTE': 'Parabéns! Você alcançou o nível máximo! O Diamante é a prova de sua dedicação total.'
   };
 
-  constructor(private sanitizer: DomSanitizer) {}
+  constructor(private sanitizer: DomSanitizer) { }
 
   getGemIcon(gemType: string, size: number = 24): SafeHtml {
     const color = this.gemColors[gemType] || this.gemColors['DIAMANTE'];
@@ -59,5 +59,10 @@ export class GemUtilsService {
   getGemDescription(gemType: string | null): string {
     if (!gemType) return 'Continue progredindo!';
     return this.gemDescriptions[gemType] || 'Continue progredindo!';
+  }
+
+  getGemColor(gemType: string | null): string {
+    if (!gemType) return '#6B7280';
+    return this.gemColors[gemType]?.fill || '#6B7280';
   }
 }

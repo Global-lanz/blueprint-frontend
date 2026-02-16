@@ -32,6 +32,7 @@ interface Project {
   templateVersion: string;
   progress: number;
   createdAt: string;
+  actualStartDate?: string;
   template?: Template;
   projectTasks?: any[];
   projectStages?: ProjectStage[];
