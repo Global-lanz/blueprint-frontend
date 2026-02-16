@@ -1,21 +1,30 @@
 <div class="bp-page">
   <div class="bp-container">
     <app-breadcrumb></app-breadcrumb>
-    
+
     <div class="bp-page-header">
       <h1>{{ isAdmin() ? 'Gerenciar Templates de Projeto' : 'Biblioteca de Templates' }}</h1>
-      <p class="bp-text-muted">{{ isAdmin() ? 'Crie e gerencie templates que os clientes usarão para criar seus projetos' : 'Escolha um template de projeto para iniciar seu trabalho' }}</p>
+      <p class="bp-text-muted">{{ isAdmin() ? 'Crie e gerencie templates que os clientes usarão para criar seus
+        projetos' : 'Escolha um template de projeto para iniciar seu trabalho' }}</p>
     </div>
-    
-    <div class="bp-flex bp-gap-lg bp-mb-lg" *ngIf="isAdmin()">
-      <button 
-        class="bp-btn bp-btn-primary" 
-        (click)="createNewTemplate()"
-      >
+
+    <div class="bp-flex bp-gap-lg bp-mb-lg bp-items-center bp-justify-between" *ngIf="isAdmin()">
+      <button class="bp-btn bp-btn-primary" (click)="createNewTemplate()">
         + Criar Novo Template
       </button>
+
+      <!-- Filtros -->
+      <div class="bp-flex bp-gap-sm bp-items-center">
+        <button class="bp-btn bp-btn-sm" [class.bp-btn-secondary]="!showInactive()"
+          [class.bp-btn-primary]="showInactive()" (click)="toggleFilter()">
+          {{ showInactive() ? 'Apenas Ativos' : 'Mostrar inativos' }}
+        </button>
+        <button *ngIf="showInactive()" class="bp-btn bp-btn-sm bp-btn-ghost" (click)="clearFilters()">
+          Limpar Filtros
+        </button>
+      </div>
     </div>
-    
+
     <!-- Lista de Templates -->
     <div class="bp-card">
       <div class="bp-card-header">
@@ -23,10 +32,18 @@
       </div>
       <div class="bp-card-body">
         <div *ngIf="templates().length === 0" class="bp-text-center bp-text-muted" style="padding: 2rem;">
-          <p>Nenhum template criado ainda.</p>
+          <p>Nenhum template encontrado.</p>
         </div>
-        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem;" *ngIf="templates().length > 0">
-          <div *ngFor="let t of templates()" class="bp-card" style="margin: 0; border-left: 4px solid var(--bp-primary);">
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem;"
+          *ngIf="templates().length > 0">
+          <div *ngFor="let t of templates()" class="bp-card" [style.opacity]="!t.isActive ? '0.6' : '1'"
+            style="margin: 0; border-left: 4px solid var(--bp-primary); position: relative;">
+            <!-- Badge de Inativo -->
+            <div *ngIf="!t.isActive"
+              style="position: absolute; top: 0.5rem; right: 0.5rem; background: #EF4444; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600;">
+              INATIVO
+            </div>
+
             <div class="bp-card-header" style="padding: 1rem; border-bottom: 1px solid #F3F4F6;">
               <div class="bp-flex bp-justify-between bp-items-start">
                 <div>
@@ -35,17 +52,24 @@
               </div>
             </div>
             <div class="bp-card-body" style="padding: 1rem;">
-              <p class="bp-text-muted" style="font-size: 0.875rem; margin: 0;">{{ t.description || "Sem descrição" }}</p>
+              <div class="bp-text-muted" style="font-size: 0.875rem; margin: 0;">
+                <app-html-renderer [content]="t.description || 'Sem descrição'"></app-html-renderer>
+              </div>
             </div>
             <div class="bp-card-footer" style="padding: 0.75rem 1rem; border-top: 1px solid #F3F4F6;">
-              <div class="bp-flex bp-gap-sm">
+              <div class="bp-flex bp-gap-sm bp-flex-wrap">
                 <button class="bp-btn bp-btn-xs bp-btn-secondary" (click)="viewTemplate(t.id)">
                   Detalhes
                 </button>
                 <button *ngIf="isAdmin()" class="bp-btn bp-btn-xs bp-btn-primary" (click)="editTemplate(t.id)">
                   Editar
                 </button>
-                <button *ngIf="!isAdmin() && t.isActive" class="bp-btn bp-btn-xs bp-btn-primary" [routerLink]="['/projects/create', t.id]">
+                <button *ngIf="isAdmin()" class="bp-btn bp-btn-xs" [class.bp-btn-success]="!t.isActive"
+                  [class.bp-btn-danger]="t.isActive" (click)="toggleTemplateActive(t, $event)">
+                  {{ t.isActive ? 'Desativar' : 'Ativar' }}
+                </button>
+                <button *ngIf="!isAdmin() && t.isActive" class="bp-btn bp-btn-xs bp-btn-primary"
+                  [routerLink]="['/projects/create', t.id]">
                   Usar
                 </button>
               </div>
