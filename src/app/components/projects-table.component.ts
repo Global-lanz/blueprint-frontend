@@ -10,6 +10,7 @@ interface Project {
   templateVersion: string;
   progress: number;
   createdAt: string;
+  actualStartDate?: string;
   currentGem?: string;
   template?: {
     name: string;
@@ -40,7 +41,7 @@ interface Project {
             {{ project.template?.name || 'N/A' }}
           </td>
           <td class="bp-text-muted">
-            {{ formatDate(project.createdAt) }}
+            {{ formatDate(project.actualStartDate || project.createdAt) }}
           </td>
           <td>
             <div class="bp-progress">

@@ -54,6 +54,7 @@ interface Project {
   price?: string;
   currency?: string;
   saleStartDate?: string;
+  actualStartDate?: string;
   links?: { [key: string]: string };
   template: {
     name: string;
@@ -479,6 +480,32 @@ style="border: 2px solid #667eea; font-size: 0.8rem; padding: 0.25rem;"
   </div>
   </div>
 
+  <!-- Actual Start Date -->
+  <div class="detail-item">
+    <label class="detail-label">
+      🚀 Data de Início Real
+      <span class="bp-tooltip">
+        <span style="font-size: 0.75rem;">(i)</span>
+        <span class="bp-tooltip-text">Esta é a data em que você começou a trabalhar neste projeto de fato. Ela substituirá a data de criação nas listagens.</span>
+      </span>
+    </label>
+    <div (click)="startEditingField('actualStartDate')" style="cursor: pointer;">
+      <div *ngIf="!editingActualStartDate" class="detail-value" style="font-size: 0.875rem;">
+        <span *ngIf="formData.actualStartDate">{{ formatDate(formData.actualStartDate) }}</span>
+        <span *ngIf="!formData.actualStartDate" class="bp-text-muted" style="font-size: 0.8rem;"> Clique para definir </span>
+      </div>
+      <input
+        *ngIf="editingActualStartDate"
+        type="date"
+        class="bp-input"
+        [(ngModel)]="formData.actualStartDate"
+        (blur)="stopEditingField('actualStartDate')"
+        (change)="markAsChanged()"
+        style="border: 2px solid #667eea; font-size: 0.8rem; padding: 0.25rem;"
+      />
+    </div>
+  </div>
+
   <!--Status -->
     <div class="detail-item">
       <label class="detail-label">📍 Status </label>
@@ -728,6 +755,7 @@ export class ProjectDetailComponent implements OnInit {
   editingName = false;
   editingPrice = false;
   editingSaleDate = false;
+  editingActualStartDate = false;
   editingLinks = false;
   hasUnsavedChanges = false;
   showAddLinkForm = false;
@@ -739,6 +767,7 @@ export class ProjectDetailComponent implements OnInit {
     price: '',
     currency: 'BRL',
     saleStartDate: '',
+    actualStartDate: '',
     links: {} as { [key: string]: string }
   };
 
@@ -787,6 +816,7 @@ export class ProjectDetailComponent implements OnInit {
       price: project.price || '',
       currency: project.currency || 'BRL',
       saleStartDate: project.saleStartDate || '',
+      actualStartDate: project.actualStartDate || '',
       links: project.links || {}
     };
   }
@@ -795,6 +825,7 @@ export class ProjectDetailComponent implements OnInit {
     if (field === 'name') this.editingName = true;
     if (field === 'price') this.editingPrice = true;
     if (field === 'saleDate') this.editingSaleDate = true;
+    if (field === 'actualStartDate') this.editingActualStartDate = true;
 
     setTimeout(() => {
       if (field === 'price') {
@@ -811,6 +842,7 @@ export class ProjectDetailComponent implements OnInit {
     if (field === 'name') this.editingName = false;
     if (field === 'price') this.editingPrice = false;
     if (field === 'saleDate') this.editingSaleDate = false;
+    if (field === 'actualStartDate') this.editingActualStartDate = false;
   }
 
   cancelEditingField(field: string) {
@@ -845,6 +877,7 @@ export class ProjectDetailComponent implements OnInit {
         price: this.formData.price || null,
         currency: this.formData.currency,
         saleStartDate: this.formData.saleStartDate || null,
+        actualStartDate: this.formData.actualStartDate || null,
         links: this.formData.links
       }).toPromise();
 
@@ -858,6 +891,7 @@ export class ProjectDetailComponent implements OnInit {
           price: this.formData.price,
           currency: this.formData.currency,
           saleStartDate: this.formData.saleStartDate,
+          actualStartDate: this.formData.actualStartDate,
           links: this.formData.links
         });
       }
@@ -876,6 +910,7 @@ export class ProjectDetailComponent implements OnInit {
     this.editingName = false;
     this.editingPrice = false;
     this.editingSaleDate = false;
+    this.editingActualStartDate = false;
     this.toast.info('Alterações canceladas');
   }
 

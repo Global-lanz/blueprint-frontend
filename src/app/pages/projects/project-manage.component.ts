@@ -41,6 +41,7 @@ interface Project {
     name: string;
     version: string;
   };
+  actualStartDate?: string;
 }
 
 @Component({
