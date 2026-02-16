@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { ToastService } from '../services/toast.service';
 import { environment } from '../../environments/environment';
+import { HtmlRendererComponent } from './html-renderer.component';
 
 interface Subtask {
   id: string;
@@ -27,11 +28,12 @@ interface Task {
 @Component({
   selector: 'app-task-card',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, HtmlRendererComponent],
   template: `
     <div class="task-card">
-      <div class="task-header" *ngIf="showHeader">
+      <div class="task-header" *ngIf="showHeader" (click)="toggleExpand()" style="cursor: pointer;">
         <div class="task-title-row">
+          <span class="expand-icon">{{ isExpanded ? '▼' : '▶' }}</span>
           <span class="task-number" *ngIf="taskNumber">{{ taskNumber }}</span>
           <h5 [class.completed]="task.completed">{{ task.title }}</h5>
         </div>
@@ -40,9 +42,10 @@ interface Task {
         </span>
       </div>
 
-      <p class="task-description" *ngIf="task.description">
-        {{ task.description }}
-      </p>
+      <div class="task-body" *ngIf="isExpanded">
+        <div class="task-description" *ngIf="task.description">
+        <app-html-renderer [content]="task.description"></app-html-renderer>
+      </div>
 
       <!-- Task Link -->
       <div class="task-link-section" style="margin-bottom: 1rem;">
@@ -80,8 +83,8 @@ interface Task {
                 (change)="onToggleSubtask(subtask)"
                 class="checkbox-input"
               />
-              <span [class.completed]="subtask.completed">
-                {{ subtask.description }}
+              <span [class.completed]="subtask.completed" style="flex: 1; min-width: 0;">
+                <app-html-renderer [content]="subtask.description"></app-html-renderer>
               </span>
             </label>
           </div>
@@ -122,6 +125,7 @@ interface Task {
           </div>
         </div>
       </div>
+      </div>
     </div>
   `,
   styles: [`
@@ -136,8 +140,25 @@ interface Task {
     .task-header {
       display: flex;
       justify-content: space-between;
-      align-items: start;
+      align-items: center;
       margin-bottom: 0.75rem;
+      padding: 0.5rem;
+      background: #f8fafc;
+      border-radius: 0.375rem;
+      transition: background 0.2s;
+    }
+
+    .task-header:hover {
+      background: #f1f5f9;
+    }
+
+    .expand-icon {
+      font-size: 0.8rem;
+      color: #64748b;
+      width: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .task-title-row {
@@ -279,10 +300,16 @@ export class TaskCardComponent {
   @Input() showHeader = true;
   @Input() showProgress = true;
   @Input() taskNumber?: number;
+  @Input() isExpanded = false;
   @Output() taskUpdated = new EventEmitter<void>();
+  @Output() taskChanged = new EventEmitter<void>();
 
   private http = inject(HttpClient);
   private toast = inject(ToastService);
+
+  toggleExpand() {
+    this.isExpanded = !this.isExpanded;
+  }
 
   editingTaskLink = false;
   tempTaskLink = '';
@@ -306,36 +333,26 @@ export class TaskCardComponent {
     this.tempTaskLink = '';
   }
 
-  async saveTaskLink() {
+  saveTaskLink() {
     const link = this.tempTaskLink?.trim();
     if (!link) {
       this.toast.error('Digite um link válido');
       return;
     }
 
-    try {
-      await this.http.patch(`${environment.apiUrl}/projects/${this.projectId}/tasks/${this.task.id}/link`, { link }).toPromise();
+    if (this.task) {
       this.task.link = link;
-      this.editingTaskLink = false;
-      this.tempTaskLink = '';
-      this.toast.success('Link da tarefa salvo!');
-      this.taskUpdated.emit();
-    } catch (err) {
-      console.error('Failed to save task link:', err);
-      this.toast.error('Erro ao salvar link da tarefa');
     }
+    this.editingTaskLink = false;
+    this.tempTaskLink = '';
+    this.taskChanged.emit();
   }
 
   async removeTaskLink() {
-    try {
-      await this.http.patch(`${environment.apiUrl}/projects/${this.projectId}/tasks/${this.task.id}/link`, { link: null }).toPromise();
+    if (this.task) {
       this.task.link = undefined;
-      this.toast.success('Link da tarefa removido!');
-      this.taskUpdated.emit();
-    } catch (err) {
-      console.error('Failed to remove task link:', err);
-      this.toast.error('Erro ao remover link da tarefa');
     }
+    this.taskChanged.emit();
   }
 
   // Subtask methods
@@ -352,13 +369,7 @@ export class TaskCardComponent {
   }
 
   async onSubtaskAnswerChange(subtask: Subtask) {
-    try {
-      await this.http.patch(`${environment.apiUrl}/projects/${this.projectId}/subtasks/${subtask.id}/answer`, {
-        answer: subtask.answer || ''
-      }).toPromise();
-    } catch (err) {
-      console.error('Failed to save subtask answer:', err);
-    }
+    this.taskChanged.emit();
   }
 
   // Subtask link methods
@@ -376,35 +387,21 @@ export class TaskCardComponent {
     delete this.tempSubtaskLinks[subtaskId];
   }
 
-  async saveSubtaskLink(subtask: Subtask) {
+  saveSubtaskLink(subtask: Subtask) {
     const link = this.tempSubtaskLinks[subtask.id]?.trim();
     if (!link) {
       this.toast.error('Digite um link válido');
       return;
     }
 
-    try {
-      await this.http.patch(`${environment.apiUrl}/projects/${this.projectId}/subtasks/${subtask.id}/link`, { link }).toPromise();
-      subtask.link = link;
-      this.editingSubtaskLinks.delete(subtask.id);
-      delete this.tempSubtaskLinks[subtask.id];
-      this.toast.success('Link da subtarefa salvo!');
-      this.taskUpdated.emit();
-    } catch (err) {
-      console.error('Failed to save subtask link:', err);
-      this.toast.error('Erro ao salvar link da subtarefa');
-    }
+    subtask.link = link;
+    this.editingSubtaskLinks.delete(subtask.id);
+    delete this.tempSubtaskLinks[subtask.id];
+    this.taskChanged.emit();
   }
 
   async removeSubtaskLink(subtask: Subtask) {
-    try {
-      await this.http.patch(`${environment.apiUrl}/projects/${this.projectId}/subtasks/${subtask.id}/link`, { link: null }).toPromise();
-      subtask.link = undefined;
-      this.toast.success('Link da subtarefa removido!');
-      this.taskUpdated.emit();
-    } catch (err) {
-      console.error('Failed to remove subtask link:', err);
-      this.toast.error('Erro ao remover link da subtarefa');
-    }
+    subtask.link = undefined;
+    this.taskChanged.emit();
   }
 }
